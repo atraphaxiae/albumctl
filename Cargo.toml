@@ -1,0 +1,10 @@
+[package]
+name = "albumctl"
+version = "0.1.0"
+authors = ["Nile Jocson"]
+edition = "2024"
+description = "A declarative local music library manager."
+readme = "./README.md"
+license = "MPL-2.0"
+
+[dependencies]
