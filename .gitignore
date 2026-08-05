@@ -10,6 +10,7 @@
 
 !/src/
 !/src/main.rs
+!/src/album.rs
 !/src/cli.rs
 !/src/commands.rs
 !/src/filesystem.rs

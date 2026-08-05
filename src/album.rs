@@ -1,0 +1,17 @@
+// SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
+// SPDX-License-Identifier: MPL-2.0
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AlbumManifest {
+	#[serde(flatten)]
+	pub id: AlbumIdentifier
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AlbumIdentifier {
+	pub title: String,
+	pub artist: String,
+	pub year: u16
+}
