@@ -3,12 +3,15 @@
 
 use std::path::Path;
 
+use error_stack::ResultExt;
 use thiserror::Error;
 
+use crate::project::Project;
 use crate::result::Result;
 
 pub fn init(path: &Path) -> Result<(), CommandError> {
-	todo!();
+	let _project = Project::init(path).change_context(CommandError::Init)?;
+
 	Ok(())
 }
 
