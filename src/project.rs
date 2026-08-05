@@ -23,7 +23,7 @@ impl Project {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ProjectManifest {
-	pub output_dir: PathBuf
+	pub output_dir: PathBuf,
 }
 
 #[derive(Debug, Error)]
