@@ -88,7 +88,7 @@ pub fn ensure_file(path: &Path, content: Option<&str>) -> Result<(), FilesystemE
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
-	#[error("Expected nothing at {path:?}")]
+	#[error("Expected no file or directory at {path:?}")]
 	RequireAbsent { path: PathBuf },
 
 	#[error("Expected a directory at {path:?}")]

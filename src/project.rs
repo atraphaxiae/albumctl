@@ -48,6 +48,6 @@ pub struct ProjectManifest {
 
 #[derive(Debug, Error)]
 pub enum ProjectError {
-	#[error("Failed to initialize albumctl project at {path:?}")]
+	#[error("Could not initialize albumctl project at {path:?}")]
 	Init { path: PathBuf },
 }
