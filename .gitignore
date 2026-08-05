@@ -15,6 +15,7 @@
 !/src/commands.rs
 !/src/filesystem.rs
 !/src/manifest.rs
+!/src/mapping.rs
 !/src/project.rs
 !/src/release.rs
 !/src/result.rs
