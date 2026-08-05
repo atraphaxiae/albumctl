@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use thiserror::Error;
 
