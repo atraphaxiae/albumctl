@@ -9,7 +9,7 @@ pub struct AlbumManifest {
 	pub id: AlbumIdentifier,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
 pub struct AlbumIdentifier {
 	pub title: String,
 	pub artist: String,

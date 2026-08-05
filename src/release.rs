@@ -13,7 +13,7 @@ pub struct ReleaseManifest {
 	pub discs: Vec<Disc>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
 pub struct ReleaseIdentifier {
 	pub catalog_number: String,
 	pub media_type: String,
