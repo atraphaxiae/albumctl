@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::album::AlbumIdentifier;
 use crate::tracklist::Disc;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct ReleaseManifest {
 	pub parent: AlbumIdentifier,
 
