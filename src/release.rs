@@ -3,13 +3,10 @@
 
 use serde::Deserialize;
 
-use crate::album::AlbumIdentifier;
 use crate::tracklist::Disc;
 
 #[derive(Debug, Deserialize)]
 pub struct ReleaseManifest {
-	pub parent: AlbumIdentifier,
-
 	pub catalog_number: String,
 	pub media_type: String,
 	pub audio_channels: String,
