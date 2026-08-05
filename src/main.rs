@@ -7,8 +7,10 @@ mod commands;
 mod filesystem;
 mod manifest;
 mod project;
+mod release;
 mod result;
 mod run;
+mod tracklist;
 
 use std::process::ExitCode;
 
