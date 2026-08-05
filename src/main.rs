@@ -3,6 +3,7 @@
 
 mod cli;
 mod commands;
+mod filesystem;
 mod project;
 mod result;
 mod run;

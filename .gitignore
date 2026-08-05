@@ -12,6 +12,7 @@
 !/src/main.rs
 !/src/cli.rs
 !/src/commands.rs
+!/src/filesystem.rs
 !/src/project.rs
 !/src/result.rs
 !/src/run.rs
