@@ -1,6 +1,13 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+mod cli;
+
+use clap::Parser;
+
+use crate::cli::Cli;
+
 fn main() {
-	println!("Hello, world!");
+	let args = Cli::parse();
+	println!("{args:?}");
 }
