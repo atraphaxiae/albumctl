@@ -10,6 +10,20 @@ use thiserror::Error;
 
 use crate::result::Result;
 
+pub fn require_absent(path: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::RequireAbsent {
+		path: path.to_path_buf(),
+	};
+
+	match path.try_exists() {
+		Ok(false) => Ok(()),
+		Ok(true) => Err(error()).attach(format!("{path:?} exists")),
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while checking if {path:?} exists")),
+	}
+}
+
 pub fn require_dir(path: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::RequireDir {
 		path: path.to_path_buf(),
@@ -74,6 +88,9 @@ pub fn ensure_file(path: &Path, content: Option<&str>) -> Result<(), FilesystemE
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
+	#[error("Expected nothing at {path:?}")]
+	RequireAbsent { path: PathBuf },
+
 	#[error("Expected a directory at {path:?}")]
 	RequireDir { path: PathBuf },
 
