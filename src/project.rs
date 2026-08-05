@@ -3,6 +3,7 @@
 
 use std::path::{Path, PathBuf};
 
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::result::Result;
@@ -18,6 +19,11 @@ impl Project {
 			root: path.to_path_buf(),
 		})
 	}
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ProjectManifest {
+	pub output_dir: PathBuf
 }
 
 #[derive(Debug, Error)]
