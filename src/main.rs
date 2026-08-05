@@ -16,10 +16,10 @@ fn main() -> ExitCode {
 	Report::set_color_mode(ColorMode::Color);
 
 	match run() {
+		Ok(()) => ExitCode::SUCCESS,
 		Err(e) => {
 			eprintln!("{e:?}");
 			ExitCode::FAILURE
 		}
-		Ok(()) => ExitCode::SUCCESS,
 	}
 }
