@@ -11,5 +11,6 @@
 !/src/
 !/src/main.rs
 !/src/cli.rs
+!/src/commands.rs
 !/src/result.rs
 !/src/run.rs

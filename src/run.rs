@@ -2,15 +2,20 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use clap::Parser;
+use error_stack::ResultExt;
 use thiserror::Error;
 
-use crate::cli::Cli;
+use crate::cli::{Cli, Command};
+use crate::commands::{build, check, init};
 use crate::result::Result;
 
 pub fn run() -> Result<(), RunError> {
 	let args = Cli::parse();
+
 	match args.command {
-		_ => todo!(),
+		Command::Init { path } => init(&path).change_context(RunError)?,
+		Command::Check { path } => check(&path).change_context(RunError)?,
+		Command::Build { path } => build(&path).change_context(RunError)?,
 	}
 
 	Ok(())
