@@ -3,12 +3,24 @@
 
 mod cli;
 mod result;
+mod run;
 
-use clap::Parser;
+use std::process::ExitCode;
 
-use crate::cli::Cli;
+use error_stack::{fmt::ColorMode, Report};
 
-fn main() {
-	let args = Cli::parse();
-	println!("{args:?}");
+use crate::run::run;
+
+fn main() -> ExitCode {
+	Report::set_color_mode(ColorMode::Color);
+
+	match run() {
+		Err(e) => {
+			eprintln!("{e:?}");
+			ExitCode::FAILURE
+		}
+		Ok(()) => {
+			ExitCode::SUCCESS
+		}
+	}
 }
