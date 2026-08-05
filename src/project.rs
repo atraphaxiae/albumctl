@@ -7,7 +7,7 @@ use error_stack::ResultExt;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::filesystem::{ensure_dir, ensure_file};
+use crate::filesystem::{ensure_dir, ensure_file, require_absent};
 use crate::manifest::save_manifest;
 use crate::result::Result;
 
@@ -25,7 +25,7 @@ impl Project {
 		ensure_dir(path).change_context_lazy(error)?;
 
 		let manifest = path.join("albumctl.toml");
-		ensure_file(&manifest, None).change_context_lazy(error)?;
+		require_absent(&manifest).change_context_lazy(error)?;
 
 		save_manifest(
 			&manifest,
