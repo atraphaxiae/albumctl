@@ -7,12 +7,12 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct MappingManifest {
-	pub discs: Vec<MappingDisc>
+	pub discs: Vec<MappingDisc>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MappingDisc {
-	pub tracks: Vec<MappingTrack>
+	pub tracks: Vec<MappingTrack>,
 }
 
 #[derive(Debug, Deserialize)]

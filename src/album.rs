@@ -6,12 +6,12 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct AlbumManifest {
 	#[serde(flatten)]
-	pub id: AlbumIdentifier
+	pub id: AlbumIdentifier,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AlbumIdentifier {
 	pub title: String,
 	pub artist: String,
-	pub year: u16
+	pub year: u16,
 }

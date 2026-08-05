@@ -5,10 +5,10 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Disc {
-	pub tracks: Vec<Track>
+	pub tracks: Vec<Track>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Track {
-	pub title: String
+	pub title: String,
 }

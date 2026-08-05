@@ -15,5 +15,5 @@ pub struct ReleaseManifest {
 	pub audio_channels: String,
 	pub provenance: String,
 
-	pub discs: Vec<Disc>
+	pub discs: Vec<Disc>,
 }
