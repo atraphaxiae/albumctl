@@ -7,10 +7,16 @@ use crate::tracklist::Disc;
 
 #[derive(Debug, Deserialize)]
 pub struct ReleaseManifest {
+	#[serde(flatten)]
+	pub id: ReleaseIdentifier,
+
+	pub discs: Vec<Disc>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ReleaseIdentifier {
 	pub catalog_number: String,
 	pub media_type: String,
 	pub audio_channels: String,
 	pub provenance: String,
-
-	pub discs: Vec<Disc>,
 }
