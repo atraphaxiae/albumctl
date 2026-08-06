@@ -3,13 +3,14 @@
 
 use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
+use std::iter::zip;
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
 use serde::Deserialize;
 use thiserror::Error;
 
-use crate::filesystem::require_dir;
+use crate::filesystem::{require_dir, require_file};
 use crate::manifest::load_manifest;
 use crate::mapping::MappingManifest;
 use crate::result::Result;
@@ -31,10 +32,34 @@ impl Release {
 		require_dir(path).change_context_lazy(error)?;
 
 		let manifest = path.join("release.toml");
-		let manifest = load_manifest(&manifest).change_context_lazy(error)?;
+		let manifest = load_manifest::<ReleaseManifest>(&manifest).change_context_lazy(error)?;
 
 		let mapping = path.join("mapping.toml");
-		let mapping = load_manifest(&mapping).change_context_lazy(error)?;
+		let mapping = load_manifest::<MappingManifest>(&mapping).change_context_lazy(error)?;
+
+		if manifest.discs.len() != mapping.discs.len() {
+			Err(error()).attach(format!(
+				"release has {} discs but the mapping has {}",
+				manifest.discs.len(),
+				mapping.discs.len()
+			))?;
+		}
+
+		for (index, (disc, mapping_disc)) in zip(&manifest.discs, &mapping.discs).enumerate() {
+			if disc.tracks.len() != mapping_disc.tracks.len() {
+				Err(error()).attach(format!(
+					"disc {} has {} tracks but the mapping has {}",
+					index + 1,
+					disc.tracks.len(),
+					mapping_disc.tracks.len()
+				))?;
+			}
+
+			for mapping_track in &mapping_disc.tracks {
+				let file = path.join(&mapping_track.file);
+				require_file(&file).change_context_lazy(error)?;
+			}
+		}
 
 		Ok(Release {
 			path: path.to_path_buf(),
