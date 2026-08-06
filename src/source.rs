@@ -35,7 +35,7 @@ impl Source {
 		require_absent(&manifest_path).change_context_lazy(error)?;
 
 		let manifest = SourceManifest {
-			output_dir: "".into(),
+			output_directory: "".into(),
 		};
 
 		save_manifest(&manifest_path, &manifest).change_context_lazy(error)?;
@@ -80,7 +80,7 @@ impl Source {
 			path: self.root.clone(),
 		};
 
-		let outdir = &self.manifest.output_dir;
+		let outdir = &self.manifest.output_directory;
 		delete_dir(outdir).change_context_lazy(error)?;
 		ensure_dir(outdir).change_context_lazy(error)?;
 
@@ -123,7 +123,7 @@ impl Source {
 			}
 		}
 
-		Ok(self.manifest.output_dir.clone())
+		Ok(self.manifest.output_directory.clone())
 	}
 
 	pub fn load_albums(&self) -> Result<HashSet<Album>, SourceError> {
@@ -154,7 +154,7 @@ impl Source {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SourceManifest {
-	pub output_dir: PathBuf,
+	pub output_directory: PathBuf,
 }
 
 #[derive(Debug, Error)]
