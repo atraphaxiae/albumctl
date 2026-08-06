@@ -15,6 +15,7 @@ use crate::result::Result;
 #[derive(Debug)]
 pub struct Project {
 	root: PathBuf,
+	manifest: ProjectManifest,
 }
 
 impl Project {
@@ -25,19 +26,18 @@ impl Project {
 
 		ensure_dir(path).change_context_lazy(error)?;
 
-		let manifest = path.join("albumctl.toml");
-		require_absent(&manifest).change_context_lazy(error)?;
+		let manifest_path = path.join("albumctl.toml");
+		require_absent(&manifest_path).change_context_lazy(error)?;
 
-		save_manifest(
-			&manifest,
-			&ProjectManifest {
-				output_dir: "~/Music".into(),
-			},
-		)
-		.change_context_lazy(error)?;
+		let manifest = ProjectManifest {
+			output_dir: "~/Music".into(),
+		};
+
+		save_manifest(&manifest_path, &manifest).change_context_lazy(error)?;
 
 		Ok(Project {
 			root: path.to_path_buf(),
+			manifest,
 		})
 	}
 
