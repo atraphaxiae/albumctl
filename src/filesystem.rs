@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use std::fs::{OpenOptions, create_dir_all, remove_dir_all};
+use std::fs::{OpenOptions, copy, create_dir_all, remove_dir_all};
 use std::io::{self, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
@@ -117,6 +117,21 @@ pub fn list_dirs(path: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	Ok(dirs)
 }
 
+pub fn copy_file(src: &Path, dest: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::CopyFile {
+		src: src.to_path_buf(),
+		dest: dest.to_path_buf(),
+	};
+
+	require_file(src).change_context_lazy(error)?;
+	require_absent(dest).change_context_lazy(error)?;
+	copy(src, dest)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while copying from {src:?} to {dest:?}"))?;
+
+	Ok(())
+}
+
 pub fn delete_dir(path: &Path) -> Result<(), FilesystemError> {
 	match remove_dir_all(path) {
 		Err(e) if e.kind() != ErrorKind::NotFound => Err(e)
@@ -147,6 +162,9 @@ pub enum FilesystemError {
 
 	#[error("Could not list subdirectories of {path:?}")]
 	ListDirs { path: PathBuf },
+
+	#[error("Could not copy file from {src:?} to {dest:?}")]
+	CopyFile { src: PathBuf, dest: PathBuf },
 
 	#[error("Could not delete directory {path:?}")]
 	DeleteDir { path: PathBuf },
