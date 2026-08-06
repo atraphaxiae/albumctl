@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use std::fs::{OpenOptions, copy, create_dir_all, remove_dir_all};
-use std::io::{self, ErrorKind, Write};
+use std::fs::{copy, create_dir_all, remove_dir_all};
+use std::io::{self, ErrorKind};
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
@@ -66,7 +66,7 @@ pub fn ensure_dir(path: &Path) -> Result<(), FilesystemError> {
 		.attach_with(|| format!("while creating {path:?}"))
 }
 
-pub fn ensure_file(path: &Path, content: Option<&str>) -> Result<(), FilesystemError> {
+/* pub fn ensure_file(path: &Path, content: Option<&str>) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::EnsureFile {
 		path: path.to_path_buf(),
 	};
@@ -84,7 +84,7 @@ pub fn ensure_file(path: &Path, content: Option<&str>) -> Result<(), FilesystemE
 			.change_context(error())
 			.attach(format!("while opening {path:?}")),
 	}
-}
+} */
 
 pub fn list_dirs(path: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	let error = || FilesystemError::ListDirs {
@@ -157,8 +157,8 @@ pub enum FilesystemError {
 	#[error("Could not ensure a directory exists at {path:?}")]
 	EnsureDir { path: PathBuf },
 
-	#[error("Could not ensure a file exists at {path:?}")]
-	EnsureFile { path: PathBuf },
+	/* #[error("Could not ensure a file exists at {path:?}")]
+	EnsureFile { path: PathBuf }, */
 
 	#[error("Could not list subdirectories of {path:?}")]
 	ListDirs { path: PathBuf },
