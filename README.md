@@ -23,7 +23,7 @@ following properties:
 `albumctl` revolves around four kinds of files:
 
 - `albumctl.toml` is the configuration for the generated music library. Right now, this only
-	contains its location.
+	specifies the output directory.
 
 - `album.toml` describes a single album. This contains the album's title, artist, original release
 	year, etc.
@@ -35,7 +35,7 @@ following properties:
 	allows `albumctl` to avoid relying on filename conventions or some other unreliable heuristic.
 
 `albumctl` enforces a strict layout on the source directory. Each subdirectory in the source
-directory should be an album directory, and each subdirectory in an album directory should be a
+directory must be an album directory, and each subdirectory in an album directory must be a
 release directory. For example:
 
 - `src/`
@@ -58,3 +58,33 @@ Then, just by running `albumctl build`, `albumctl` generates your music library 
 producing a clean, reproducible music library at the configured output directory, while keeping
 the source unchanged. This generated library is disposable; if it is ever lost, it can always be
 recreated using `albumctl build`.
+
+## Installation
+`albumctl` is not yet available on any package manager, so it must be built from source:
+
+```sh
+git clone https://github.com/atraphaxiae/albumctl.git
+cd albumctl
+cargo install --path .
+```
+
+## Quick Start
+Create a new `albumctl` source:
+
+```sh
+albumctl init music-src
+```
+
+Populate it with your manifests and music files, then build the music library:
+
+```sh
+albumctl build music-src
+```
+
+If there are no errors, your music library has been generated at the output directory set in
+`albumctl.toml`. The source directory remains unchanged. If you ever lose your music library, just
+run the build command again.
+
+## Documentation
+The complete documentation of `albumctl` can be found at
+[`https://atraphaxiae.github.io/albumctl`](https://atraphaxiae.github.io/albumctl).
