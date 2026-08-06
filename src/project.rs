@@ -5,6 +5,7 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
+use indoc::formatdoc;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -67,10 +68,14 @@ impl Project {
 		for dir in list_dirs(&self.root).change_context_lazy(error)? {
 			let album = Album::load(&dir).change_context_lazy(error)?;
 			if let Some(original) = albums.get(&album) {
-				Err(error()).attach(format!(
-					"duplicate album {album} at {:?}, originally loaded from {:?}",
-					album.path(),
-					original.path()
+				Err(error()).attach(formatdoc!(
+					r#"
+						duplicate albums of "{album}" found at:
+							- {}
+							- {}
+					"#,
+					album.path().display(),
+					original.path().display()
 				))?;
 			}
 			albums.insert(album);
