@@ -57,8 +57,7 @@ impl Hash for Album {
 
 impl Display for Album {
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		let AlbumIdentifier { title, artist, year } = &self.manifest.id;
-		write!(f, "{artist} - ({year}) {title}")
+		self.manifest.id.fmt(f)
 	}
 }
 
@@ -73,6 +72,17 @@ pub struct AlbumIdentifier {
 	pub title: String,
 	pub artist: String,
 	pub year: u16,
+}
+
+impl Display for AlbumIdentifier {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		let Self {
+			artist,
+			year,
+			title,
+		} = self;
+		write!(f, "{artist} - ({year}) {title}")
+	}
 }
 
 #[derive(Debug, Error)]
