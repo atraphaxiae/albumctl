@@ -17,8 +17,8 @@
 !/src/manifest.rs
 !/src/mapping.rs
 !/src/print.rs
-!/src/project.rs
 !/src/release.rs
 !/src/result.rs
 !/src/run.rs
+!/src/source.rs
 !/src/tracklist.rs

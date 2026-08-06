@@ -7,14 +7,14 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::print::success;
-use crate::project::Project;
+use crate::source::Source;
 use crate::result::Result;
 
 pub fn init(path: &Path) -> Result<(), CommandError> {
-	Project::init(path).change_context(CommandError::Init)?;
+	Source::init(path).change_context(CommandError::Init)?;
 
 	success!(
-		"Successfully initialized albumctl project at {}",
+		"Successfully initialized albumctl source at {}",
 		path.display()
 	);
 	Ok(())
@@ -23,11 +23,11 @@ pub fn init(path: &Path) -> Result<(), CommandError> {
 pub fn check(path: &Path) -> Result<(), CommandError> {
 	let error = || CommandError::Check;
 
-	let project = Project::load(path).change_context(error())?;
-	project.check().change_context(error())?;
+	let source = Source::load(path).change_context(error())?;
+	source.check().change_context(error())?;
 
 	success!(
-		"Successfully validated albumctl project at {}",
+		"Successfully validated albumctl source at {}",
 		path.display()
 	);
 	Ok(())
@@ -36,11 +36,11 @@ pub fn check(path: &Path) -> Result<(), CommandError> {
 pub fn build(path: &Path) -> Result<(), CommandError> {
 	let error = || CommandError::Build;
 
-	let project = Project::load(path).change_context(error())?;
-	let outdir = project.build().change_context(error())?;
+	let source = Source::load(path).change_context(error())?;
+	let outdir = source.build().change_context(error())?;
 
 	success!(
-		"Successfully built albumctl project at {}.\nOutput: {}",
+		"Successfully built albumctl source at {}.\nOutput: {}",
 		path.display(),
 		outdir.display()
 	);
@@ -49,12 +49,12 @@ pub fn build(path: &Path) -> Result<(), CommandError> {
 
 #[derive(Debug, Error)]
 pub enum CommandError {
-	#[error("Failed to initialize albumctl project")]
+	#[error("Failed to initialize albumctl source")]
 	Init,
 
-	#[error("Failed to validate albumctl project")]
+	#[error("Failed to validate albumctl source")]
 	Check,
 
-	#[error("Failed to build albumctl project")]
+	#[error("Failed to build albumctl source")]
 	Build,
 }

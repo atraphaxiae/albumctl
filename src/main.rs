@@ -8,7 +8,7 @@ mod filesystem;
 mod manifest;
 mod mapping;
 mod print;
-mod project;
+mod source;
 mod release;
 mod result;
 mod run;

@@ -18,14 +18,14 @@ use crate::release::ResolvedTrack;
 use crate::result::Result;
 
 #[derive(Debug)]
-pub struct Project {
+pub struct Source {
 	root: PathBuf,
-	manifest: ProjectManifest,
+	manifest: SourceManifest,
 }
 
-impl Project {
-	pub fn init(path: &Path) -> Result<Self, ProjectError> {
-		let error = || ProjectError::Init {
+impl Source {
+	pub fn init(path: &Path) -> Result<Self, SourceError> {
+		let error = || SourceError::Init {
 			path: path.to_path_buf(),
 		};
 
@@ -34,20 +34,20 @@ impl Project {
 		let manifest_path = path.join("albumctl.toml");
 		require_absent(&manifest_path).change_context_lazy(error)?;
 
-		let manifest = ProjectManifest {
+		let manifest = SourceManifest {
 			output_dir: "".into(),
 		};
 
 		save_manifest(&manifest_path, &manifest).change_context_lazy(error)?;
 
-		Ok(Project {
+		Ok(Source {
 			root: path.to_path_buf(),
 			manifest,
 		})
 	}
 
-	pub fn load(path: &Path) -> Result<Self, ProjectError> {
-		let error = || ProjectError::Load {
+	pub fn load(path: &Path) -> Result<Self, SourceError> {
+		let error = || SourceError::Load {
 			path: path.to_path_buf(),
 		};
 
@@ -56,14 +56,14 @@ impl Project {
 		let manifest = path.join("albumctl.toml");
 		let manifest = load_manifest(&manifest).change_context_lazy(error)?;
 
-		Ok(Project {
+		Ok(Source {
 			root: path.to_path_buf(),
 			manifest,
 		})
 	}
 
-	pub fn check(&self) -> Result<(), ProjectError> {
-		let error = || ProjectError::Check {
+	pub fn check(&self) -> Result<(), SourceError> {
+		let error = || SourceError::Check {
 			path: self.root.clone(),
 		};
 
@@ -75,8 +75,8 @@ impl Project {
 		Ok(())
 	}
 
-	pub fn build(&self) -> Result<PathBuf, ProjectError> {
-		let error = || ProjectError::Build {
+	pub fn build(&self) -> Result<PathBuf, SourceError> {
+		let error = || SourceError::Build {
 			path: self.root.clone(),
 		};
 
@@ -126,8 +126,8 @@ impl Project {
 		Ok(self.manifest.output_dir.clone())
 	}
 
-	pub fn load_albums(&self) -> Result<HashSet<Album>, ProjectError> {
-		let error = || ProjectError::LoadAlbums {
+	pub fn load_albums(&self) -> Result<HashSet<Album>, SourceError> {
+		let error = || SourceError::LoadAlbums {
 			path: self.root.clone(),
 		};
 
@@ -153,24 +153,24 @@ impl Project {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ProjectManifest {
+pub struct SourceManifest {
 	pub output_dir: PathBuf,
 }
 
 #[derive(Debug, Error)]
-pub enum ProjectError {
-	#[error("Could not initialize albumctl project at {path:?}")]
+pub enum SourceError {
+	#[error("Could not initialize albumctl source at {path:?}")]
 	Init { path: PathBuf },
 
-	#[error("Could not load albumctl project at {path:?}")]
+	#[error("Could not load albumctl source at {path:?}")]
 	Load { path: PathBuf },
 
-	#[error("Detected errors in project at {path:?}")]
+	#[error("Detected errors in source at {path:?}")]
 	Check { path: PathBuf },
 
-	#[error("Could not build project at {path:?}")]
+	#[error("Could not build source at {path:?}")]
 	Build { path: PathBuf },
 
-	#[error("Could not load albums of project at {path:?}")]
+	#[error("Could not load albums of source at {path:?}")]
 	LoadAlbums { path: PathBuf },
 }
