@@ -35,7 +35,7 @@ impl Project {
 		require_absent(&manifest_path).change_context_lazy(error)?;
 
 		let manifest = ProjectManifest {
-			output_dir: "~/Music".into(),
+			output_dir: "".into(),
 		};
 
 		save_manifest(&manifest_path, &manifest).change_context_lazy(error)?;
