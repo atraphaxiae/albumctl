@@ -1,16 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+use std::collections::HashSet;
 use std::fmt::{self, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
+use indoc::formatdoc;
 use serde::Deserialize;
 use thiserror::Error;
 
-use crate::filesystem::require_dir;
+use crate::filesystem::{list_dirs, require_dir};
 use crate::manifest::load_manifest;
+use crate::release::Release;
 use crate::result::Result;
 
 #[derive(Debug)]
@@ -34,6 +37,32 @@ impl Album {
 			path: path.to_path_buf(),
 			manifest,
 		})
+	}
+
+	pub fn load_releases(&self) -> Result<HashSet<Release>, AlbumError> {
+		let error = || AlbumError::LoadReleases {
+			path: self.path.clone(),
+		};
+
+		let mut releases = HashSet::<Release>::new();
+		for dir in list_dirs(&self.path).change_context_lazy(error)? {
+			let release = Release::load(&dir).change_context_lazy(error)?;
+			if let Some(original) = releases.get(&release) {
+				Err(error()).attach(formatdoc!(
+					r#"
+						for album "{self}":
+						duplicate releases of "{release}" found at:
+							- {}
+							- {}
+					"#,
+					release.path().display(),
+					original.path().display()
+				))?;
+			}
+			releases.insert(release);
+		}
+
+		Ok(releases)
 	}
 
 	pub fn path(&self) -> &Path {
@@ -89,4 +118,7 @@ impl Display for AlbumIdentifier {
 pub enum AlbumError {
 	#[error("Could not load album at {path:?}")]
 	Load { path: PathBuf },
+
+	#[error("Could not load releases of album at {path:?}")]
+	LoadReleases { path: PathBuf },
 }
