@@ -10,8 +10,7 @@ use crate::project::Project;
 use crate::result::Result;
 
 pub fn init(path: &Path) -> Result<(), CommandError> {
-	let _project = Project::init(path).change_context(CommandError::Init)?;
-
+	Project::init(path).change_context(CommandError::Init)?;
 	Ok(())
 }
 
