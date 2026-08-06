@@ -8,7 +8,7 @@ pub struct Disc {
 	pub tracks: Vec<Track>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Track {
 	pub title: String,
 }

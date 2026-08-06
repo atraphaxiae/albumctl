@@ -14,7 +14,7 @@ use crate::filesystem::{require_dir, require_file};
 use crate::manifest::load_manifest;
 use crate::mapping::MappingManifest;
 use crate::result::Result;
-use crate::tracklist::Disc;
+use crate::tracklist::{Disc, Track};
 
 #[derive(Debug)]
 pub struct Release {
@@ -68,6 +68,26 @@ impl Release {
 		})
 	}
 
+	pub fn resolve_tracks(&self) -> Vec<ResolvedTrack> {
+		let mut tracks = Vec::new();
+		for (disc_number, (disc, mapping_disc)) in
+			zip(&self.manifest.discs, &self.mapping.discs).enumerate()
+		{
+			for (track_number, (track, mapping_track)) in
+				zip(&disc.tracks, &mapping_disc.tracks).enumerate()
+			{
+				tracks.push(ResolvedTrack {
+					disc_number,
+					track_number,
+					track: track.clone(),
+					file: self.path().join(&mapping_track.file),
+				});
+			}
+		}
+
+		tracks
+	}
+
 	pub fn path(&self) -> &Path {
 		&self.path
 	}
@@ -91,6 +111,14 @@ impl Display for Release {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		self.manifest.id.fmt(f)
 	}
+}
+
+#[derive(Debug)]
+pub struct ResolvedTrack {
+	pub disc_number: usize,
+	pub track_number: usize,
+	pub track: Track,
+	pub file: PathBuf,
 }
 
 #[derive(Debug, Deserialize)]
