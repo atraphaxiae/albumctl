@@ -92,17 +92,17 @@ impl Display for Album {
 #[derive(Debug, Deserialize)]
 pub struct AlbumManifest {
 	#[serde(flatten)]
-	pub id: AlbumIdentifier,
+	pub id: AlbumId,
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Hash, Clone)]
-pub struct AlbumIdentifier {
+pub struct AlbumId {
 	pub title: String,
 	pub artist: String,
 	pub year: u16,
 }
 
-impl Display for AlbumIdentifier {
+impl Display for AlbumId {
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		let Self {
 			artist,
@@ -119,5 +119,5 @@ pub enum AlbumError {
 	Load { path: PathBuf },
 
 	#[error("Could not load releases of album \"{id}\"")]
-	LoadReleases { id: AlbumIdentifier },
+	LoadReleases { id: AlbumId },
 }

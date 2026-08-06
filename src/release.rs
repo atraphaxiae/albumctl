@@ -124,13 +124,13 @@ pub struct ResolvedTrack {
 #[derive(Debug, Deserialize)]
 pub struct ReleaseManifest {
 	#[serde(flatten)]
-	pub id: ReleaseIdentifier,
+	pub id: ReleaseId,
 
 	pub discs: Vec<Disc>,
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
-pub struct ReleaseIdentifier {
+pub struct ReleaseId {
 	pub year: u16,
 	pub catalog_number: String,
 	pub media_type: String,
@@ -138,7 +138,7 @@ pub struct ReleaseIdentifier {
 	pub provenance: String,
 }
 
-impl Display for ReleaseIdentifier {
+impl Display for ReleaseId {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		let Self {
 			year,
