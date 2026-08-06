@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+use std::fmt::{self, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 
@@ -34,6 +35,10 @@ impl Album {
 			manifest,
 		})
 	}
+
+	pub fn path(&self) -> &Path {
+		&self.path
+	}
 }
 
 impl PartialEq for Album {
@@ -47,6 +52,13 @@ impl Eq for Album {}
 impl Hash for Album {
 	fn hash<H: Hasher>(&self, state: &mut H) {
 		self.manifest.id.hash(state);
+	}
+}
+
+impl Display for Album {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		let AlbumIdentifier { title, artist, year } = &self.manifest.id;
+		write!(f, "{artist} - ({year}) {title}")
 	}
 }
 
