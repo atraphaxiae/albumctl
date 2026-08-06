@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::fs::{OpenOptions, create_dir_all};
-use std::io::{ErrorKind, Write};
+use std::io::{self, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
@@ -86,6 +86,37 @@ pub fn ensure_file(path: &Path, content: Option<&str>) -> Result<(), FilesystemE
 	}
 }
 
+pub fn list_dirs(path: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
+	let error = || FilesystemError::ListDirs {
+		path: path.to_path_buf(),
+	};
+
+	let entries = path
+		.read_dir()
+		.change_context_lazy(error)
+		.attach_with(|| format!("while reading {path:?}"))?
+		.collect::<io::Result<Vec<_>>>()
+		.change_context_lazy(error)
+		.attach_with(|| format!("while enumerating entries of {path:?}"))?;
+
+	let dirs = entries
+		.into_iter()
+		.filter_map(|entry| {
+			let path = entry.path();
+			match entry.metadata() {
+				Ok(metadata) => metadata.is_dir().then_some(Ok(path)),
+				Err(e) => Some(
+					Err(e)
+						.change_context_lazy(error)
+						.attach_with(|| format!("while reading metadata of {path:?}")),
+				),
+			}
+		})
+		.collect::<Result<Vec<_>, _>>()?;
+
+	Ok(dirs)
+}
+
 #[derive(Debug, Error)]
 pub enum FilesystemError {
 	#[error("Expected no file or directory at {path:?}")]
@@ -102,4 +133,7 @@ pub enum FilesystemError {
 
 	#[error("Could not ensure a file exists at {path:?}")]
 	EnsureFile { path: PathBuf },
+
+	#[error("Could not list subdirectories of {path:?}")]
+	ListDirs { path: PathBuf },
 }
