@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::album::Album;
-use crate::filesystem::{ensure_dir, list_dirs, require_absent};
-use crate::manifest::save_manifest;
+use crate::filesystem::{ensure_dir, list_dirs, require_absent, require_dir};
+use crate::manifest::{load_manifest, save_manifest};
 use crate::result::Result;
 
 #[derive(Debug)]
@@ -41,6 +41,20 @@ impl Project {
 		})
 	}
 
+	pub fn load(path: &Path) -> Result<Self, ProjectError> {
+		let error = || ProjectError::Load { path: path.to_path_buf() };
+
+		require_dir(path).change_context_lazy(error)?;
+
+		let manifest = path.join("albumctl.toml");
+		let manifest = load_manifest(&manifest).change_context_lazy(error)?;
+
+		Ok(Project {
+			root: path.to_path_buf(),
+			manifest
+		})
+	}
+
 	pub fn load_albums(&self) -> Result<Vec<Album>, ProjectError> {
 		let error = || ProjectError::LoadAlbums {
 			path: self.root.clone(),
@@ -64,6 +78,9 @@ pub struct ProjectManifest {
 pub enum ProjectError {
 	#[error("Could not initialize albumctl project at {path:?}")]
 	Init { path: PathBuf },
+
+	#[error("Could not load albumctl project at {path:?}")]
+	Load { path: PathBuf},
 
 	#[error("Could not load albums of project at {path:?}")]
 	LoadAlbums { path: PathBuf },
