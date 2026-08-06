@@ -19,14 +19,7 @@ pub fn check(path: &Path) -> Result<(), CommandError> {
 	let error = || CommandError::Check;
 
 	let project = Project::load(path).change_context(error())?;
-	let albums = project.load_albums().change_context(error())?;
-
-	for album in albums {
-		let releases = album.load_releases().change_context(error())?;
-		dbg!(releases);
-	}
-
-	Ok(())
+	project.check().change_context(error())
 }
 
 pub fn build(path: &Path) -> Result<(), CommandError> {

@@ -59,6 +59,19 @@ impl Project {
 		})
 	}
 
+	pub fn check(&self) -> Result<(), ProjectError> {
+		let error = || ProjectError::Check {
+			path: self.root.clone(),
+		};
+
+		let albums = self.load_albums().change_context(error())?;
+		for album in albums {
+			album.load_releases().change_context(error())?;
+		}
+
+		Ok(())
+	}
+
 	pub fn load_albums(&self) -> Result<HashSet<Album>, ProjectError> {
 		let error = || ProjectError::LoadAlbums {
 			path: self.root.clone(),
@@ -97,6 +110,9 @@ pub enum ProjectError {
 
 	#[error("Could not load albumctl project at {path:?}")]
 	Load { path: PathBuf },
+
+	#[error("Detected errors in project at {path:?}")]
+	Check { path: PathBuf },
 
 	#[error("Could not load albums of project at {path:?}")]
 	LoadAlbums { path: PathBuf },
