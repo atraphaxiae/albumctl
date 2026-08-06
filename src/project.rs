@@ -17,7 +17,7 @@ pub struct Project {
 }
 
 impl Project {
-	pub fn init(path: &Path) -> Result<Project, ProjectError> {
+	pub fn init(path: &Path) -> Result<Self, ProjectError> {
 		let error = || ProjectError::Init {
 			path: path.to_path_buf(),
 		};
