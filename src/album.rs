@@ -41,7 +41,7 @@ impl Album {
 
 	pub fn load_releases(&self) -> Result<HashSet<Release>, AlbumError> {
 		let error = || AlbumError::LoadReleases {
-			path: self.path.clone(),
+			id: self.manifest.id.clone(),
 		};
 
 		let mut releases = HashSet::<Release>::new();
@@ -50,7 +50,6 @@ impl Album {
 			if let Some(original) = releases.get(&release) {
 				Err(error()).attach(formatdoc!(
 					r#"
-						for album "{self}":
 						duplicate releases of "{release}" found at:
 							- {}
 							- {}
@@ -96,7 +95,7 @@ pub struct AlbumManifest {
 	pub id: AlbumIdentifier,
 }
 
-#[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Debug, Deserialize, Eq, PartialEq, Hash, Clone)]
 pub struct AlbumIdentifier {
 	pub title: String,
 	pub artist: String,
@@ -119,6 +118,6 @@ pub enum AlbumError {
 	#[error("Could not load album at {path:?}")]
 	Load { path: PathBuf },
 
-	#[error("Could not load releases of album at {path:?}")]
-	LoadReleases { path: PathBuf },
+	#[error(r#"Could not load releases of album "{id}""#)]
+	LoadReleases { id: AlbumIdentifier },
 }
