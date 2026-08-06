@@ -109,8 +109,9 @@ impl Project {
 						track_number + 1,
 						track.title
 					));
+
 					if let Some(extension) = file.extension() {
-						output_file.set_extension(extension);
+						output_file.add_extension(extension);
 					}
 
 					copy_file(&file, &output_file).change_context_lazy(error)?;
