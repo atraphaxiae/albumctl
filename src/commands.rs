@@ -16,7 +16,13 @@ pub fn init(path: &Path) -> Result<(), CommandError> {
 }
 
 pub fn check(path: &Path) -> Result<(), CommandError> {
-	todo!();
+	let error = || CommandError::Check;
+
+	let project = Project::load(path).change_context(error())?;
+	let albums = project.load_albums().change_context(error())?;
+
+	dbg!(albums);
+
 	Ok(())
 }
 
