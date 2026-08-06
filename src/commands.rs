@@ -13,7 +13,10 @@ use crate::result::Result;
 pub fn init(path: &Path) -> Result<(), CommandError> {
 	Project::init(path).change_context(CommandError::Init)?;
 
-	success!("Successfully initialized albumctl project at {}", path.display());
+	success!(
+		"Successfully initialized albumctl project at {}",
+		path.display()
+	);
 	Ok(())
 }
 
@@ -23,7 +26,10 @@ pub fn check(path: &Path) -> Result<(), CommandError> {
 	let project = Project::load(path).change_context(error())?;
 	project.check().change_context(error())?;
 
-	success!("Successfully validated albumctl project at {}", path.display());
+	success!(
+		"Successfully validated albumctl project at {}",
+		path.display()
+	);
 	Ok(())
 }
 
