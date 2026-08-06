@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use std::fs::{OpenOptions, create_dir_all};
+use std::fs::{OpenOptions, create_dir_all, remove_dir_all};
 use std::io::{self, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
@@ -117,6 +117,17 @@ pub fn list_dirs(path: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	Ok(dirs)
 }
 
+pub fn delete_dir(path: &Path) -> Result<(), FilesystemError> {
+	match remove_dir_all(path) {
+		Err(e) if e.kind() != ErrorKind::NotFound => Err(e)
+			.change_context(FilesystemError::DeleteDir {
+				path: path.to_path_buf(),
+			})
+			.attach(format!("while deleting {path:?}")),
+		_ => Ok(()),
+	}
+}
+
 #[derive(Debug, Error)]
 pub enum FilesystemError {
 	#[error("Expected no file or directory at {path:?}")]
@@ -136,4 +147,7 @@ pub enum FilesystemError {
 
 	#[error("Could not list subdirectories of {path:?}")]
 	ListDirs { path: PathBuf },
+
+	#[error("Could not delete directory {path:?}")]
+	DeleteDir { path: PathBuf },
 }
