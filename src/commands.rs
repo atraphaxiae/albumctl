@@ -21,7 +21,10 @@ pub fn check(path: &Path) -> Result<(), CommandError> {
 	let project = Project::load(path).change_context(error())?;
 	let albums = project.load_albums().change_context(error())?;
 
-	dbg!(albums);
+	for album in albums {
+		let releases = album.load_releases().change_context(error())?;
+		dbg!(releases);
+	}
 
 	Ok(())
 }
