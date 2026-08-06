@@ -96,7 +96,7 @@ impl Display for ReleaseIdentifier {
 		} = self;
 		write!(
 			f,
-			"{year}, {catalog_number}, {media_type}, {audio_channels}, {provenance}"
+			"({year}) {catalog_number} [{media_type}, {audio_channels}, {provenance}]"
 		)
 	}
 }
