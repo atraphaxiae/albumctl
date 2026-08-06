@@ -7,6 +7,7 @@ mod commands;
 mod filesystem;
 mod manifest;
 mod mapping;
+mod print;
 mod project;
 mod release;
 mod result;
