@@ -20,7 +20,7 @@ use crate::result::Result;
 #[derive(Debug)]
 pub struct Source {
 	root: PathBuf,
-	manifest: SourceManifest,
+	config: Config,
 }
 
 impl Source {
@@ -31,18 +31,18 @@ impl Source {
 
 		ensure_dir(path).change_context_lazy(error)?;
 
-		let manifest_path = path.join("albumctl.toml");
-		require_absent(&manifest_path).change_context_lazy(error)?;
+		let config_path = path.join("albumctl.toml");
+		require_absent(&config_path).change_context_lazy(error)?;
 
-		let manifest = SourceManifest {
+		let config = Config {
 			output_directory: "".into(),
 		};
 
-		save_manifest(&manifest_path, &manifest).change_context_lazy(error)?;
+		save_manifest(&config_path, &config).change_context_lazy(error)?;
 
 		Ok(Source {
 			root: path.to_path_buf(),
-			manifest,
+			config,
 		})
 	}
 
@@ -53,12 +53,12 @@ impl Source {
 
 		require_dir(path).change_context_lazy(error)?;
 
-		let manifest = path.join("albumctl.toml");
-		let manifest = load_manifest(&manifest).change_context_lazy(error)?;
+		let config = path.join("albumctl.toml");
+		let config = load_manifest(&config).change_context_lazy(error)?;
 
 		Ok(Source {
 			root: path.to_path_buf(),
-			manifest,
+			config,
 		})
 	}
 
@@ -80,7 +80,7 @@ impl Source {
 			path: self.root.clone(),
 		};
 
-		let outdir = &self.manifest.output_directory;
+		let outdir = &self.config.output_directory;
 		delete_dir(outdir).change_context_lazy(error)?;
 		ensure_dir(outdir).change_context_lazy(error)?;
 
@@ -123,7 +123,7 @@ impl Source {
 			}
 		}
 
-		Ok(self.manifest.output_directory.clone())
+		Ok(self.config.output_directory.clone())
 	}
 
 	pub fn load_albums(&self) -> Result<HashSet<Album>, SourceError> {
@@ -153,7 +153,7 @@ impl Source {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct SourceManifest {
+pub struct Config {
 	pub output_directory: PathBuf,
 }
 
