@@ -107,7 +107,7 @@ impl Source {
 						file,
 					} = track;
 
-					let mut output_file = release_path.join(format!(
+					let mut destination = release_path.join(format!(
 						"{}.{:02} {}",
 						disc_number + 1,
 						track_number + 1,
@@ -115,10 +115,10 @@ impl Source {
 					));
 
 					if let Some(extension) = file.extension() {
-						output_file.add_extension(extension);
+						destination.add_extension(extension);
 					}
 
-					copy_file(&file, &output_file).change_context_lazy(error)?;
+					copy_file(&file, &destination).change_context_lazy(error)?;
 				}
 			}
 		}
