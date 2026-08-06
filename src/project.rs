@@ -10,8 +10,11 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::album::Album;
-use crate::filesystem::{ensure_dir, list_dirs, require_absent, require_dir};
+use crate::filesystem::{
+	copy_file, delete_dir, ensure_dir, list_dirs, require_absent, require_dir,
+};
 use crate::manifest::{load_manifest, save_manifest};
+use crate::release::ResolvedTrack;
 use crate::result::Result;
 
 #[derive(Debug)]
@@ -72,6 +75,52 @@ impl Project {
 		Ok(())
 	}
 
+	pub fn build(&self) -> Result<PathBuf, ProjectError> {
+		let error = || ProjectError::Build {
+			path: self.root.clone(),
+		};
+
+		let outdir = &self.manifest.output_dir;
+		delete_dir(outdir).change_context_lazy(error)?;
+		ensure_dir(outdir).change_context_lazy(error)?;
+
+		let albums = self.load_albums().change_context_lazy(error)?;
+		for album in albums {
+			let album_path = outdir.join(album.to_string());
+			ensure_dir(&album_path).change_context_lazy(error)?;
+
+			let releases = album.load_releases().change_context(error())?;
+			for release in releases {
+				let release_path = album_path.join(release.to_string());
+				ensure_dir(&release_path).change_context_lazy(error)?;
+
+				let tracks = release.resolve_tracks();
+				for track in tracks {
+					let ResolvedTrack {
+						disc_number,
+						track_number,
+						track,
+						file,
+					} = track;
+
+					let mut output_file = release_path.join(format!(
+						"{}.{:02} {}",
+						disc_number + 1,
+						track_number + 1,
+						track.title
+					));
+					if let Some(extension) = file.extension() {
+						output_file.set_extension(extension);
+					}
+
+					copy_file(&file, &output_file).change_context_lazy(error)?;
+				}
+			}
+		}
+
+		Ok(self.manifest.output_dir.clone())
+	}
+
 	pub fn load_albums(&self) -> Result<HashSet<Album>, ProjectError> {
 		let error = || ProjectError::LoadAlbums {
 			path: self.root.clone(),
@@ -113,6 +162,9 @@ pub enum ProjectError {
 
 	#[error("Detected errors in project at {path:?}")]
 	Check { path: PathBuf },
+
+	#[error("Could not build project at {path:?}")]
+	Build { path: PathBuf },
 
 	#[error("Could not load albums of project at {path:?}")]
 	LoadAlbums { path: PathBuf },
