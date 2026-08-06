@@ -42,7 +42,9 @@ impl Project {
 	}
 
 	pub fn load(path: &Path) -> Result<Self, ProjectError> {
-		let error = || ProjectError::Load { path: path.to_path_buf() };
+		let error = || ProjectError::Load {
+			path: path.to_path_buf(),
+		};
 
 		require_dir(path).change_context_lazy(error)?;
 
@@ -51,7 +53,7 @@ impl Project {
 
 		Ok(Project {
 			root: path.to_path_buf(),
-			manifest
+			manifest,
 		})
 	}
 
@@ -80,7 +82,7 @@ pub enum ProjectError {
 	Init { path: PathBuf },
 
 	#[error("Could not load albumctl project at {path:?}")]
-	Load { path: PathBuf},
+	Load { path: PathBuf },
 
 	#[error("Could not load albums of project at {path:?}")]
 	LoadAlbums { path: PathBuf },

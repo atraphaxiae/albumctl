@@ -7,6 +7,7 @@ use error_stack::ResultExt;
 use serde::Deserialize;
 use thiserror::Error;
 
+use crate::filesystem::require_dir;
 use crate::manifest::load_manifest;
 use crate::result::Result;
 
@@ -18,10 +19,14 @@ pub struct Album {
 
 impl Album {
 	pub fn load(path: &Path) -> Result<Self, AlbumError> {
-		let manifest = path.join("album.toml");
-		let manifest = load_manifest(&manifest).change_context_lazy(|| AlbumError::Load {
+		let error = || AlbumError::Load {
 			path: path.to_path_buf(),
-		})?;
+		};
+
+		require_dir(path).change_context_lazy(error)?;
+
+		let manifest = path.join("album.toml");
+		let manifest = load_manifest(&manifest).change_context_lazy(error)?;
 
 		Ok(Album {
 			path: path.to_path_buf(),
