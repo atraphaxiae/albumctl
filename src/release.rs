@@ -78,6 +78,7 @@ pub struct ReleaseManifest {
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Hash)]
 pub struct ReleaseIdentifier {
+	pub year: u16,
 	pub catalog_number: String,
 	pub media_type: String,
 	pub audio_channels: String,
@@ -87,6 +88,7 @@ pub struct ReleaseIdentifier {
 impl Display for ReleaseIdentifier {
 	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 		let Self {
+			year,
 			catalog_number,
 			media_type,
 			audio_channels,
@@ -94,7 +96,7 @@ impl Display for ReleaseIdentifier {
 		} = self;
 		write!(
 			f,
-			"{catalog_number}, {media_type}, {audio_channels}, {provenance}"
+			"{year}, {catalog_number}, {media_type}, {audio_channels}, {provenance}"
 		)
 	}
 }
