@@ -34,7 +34,16 @@ pub fn check(path: &Path) -> Result<(), CommandError> {
 }
 
 pub fn build(path: &Path) -> Result<(), CommandError> {
-	todo!();
+	let error = || CommandError::Build;
+
+	let project = Project::load(path).change_context(error())?;
+	let outdir = project.build().change_context(error())?;
+
+	success!(
+		"Successfully built albumctl project at {}.\nOutput: {}",
+		path.display(),
+		outdir.display()
+	);
 	Ok(())
 }
 
