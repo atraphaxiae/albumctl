@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
@@ -32,6 +33,20 @@ impl Album {
 			path: path.to_path_buf(),
 			manifest,
 		})
+	}
+}
+
+impl PartialEq for Album {
+	fn eq(&self, other: &Self) -> bool {
+		self.manifest.id == other.manifest.id
+	}
+}
+
+impl Eq for Album {}
+
+impl Hash for Album {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.manifest.id.hash(state);
 	}
 }
 
