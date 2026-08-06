@@ -46,7 +46,9 @@ release directory. For example:
 			- `release.toml`
 			- `mapping.toml`
 			- `01 - Witch Hunt.flac`
-			- *music files and auxiliary files here...*
+			- *additional music and auxiliary files...*
+		- *additional releases...*
+	- *additional albums...*
 
 The directory names don't matter. `albumctl` identifies albums and releases from the manifest files,
 not from the names of the directories. The only requirement is that the source directory follows
