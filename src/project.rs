@@ -7,7 +7,8 @@ use error_stack::ResultExt;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::filesystem::{ensure_dir, require_absent};
+use crate::album::Album;
+use crate::filesystem::{ensure_dir, list_dirs, require_absent};
 use crate::manifest::save_manifest;
 use crate::result::Result;
 
@@ -39,6 +40,19 @@ impl Project {
 			root: path.to_path_buf(),
 		})
 	}
+
+	pub fn load_albums(&self) -> Result<Vec<Album>, ProjectError> {
+		let error = || ProjectError::LoadAlbums {
+			path: self.root.clone(),
+		};
+
+		list_dirs(&self.root)
+			.change_context_lazy(error)?
+			.into_iter()
+			.map(|dir| Album::load(&dir))
+			.collect::<Result<Vec<_>, _>>()
+			.change_context_lazy(error)
+	}
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -50,4 +64,7 @@ pub struct ProjectManifest {
 pub enum ProjectError {
 	#[error("Could not initialize albumctl project at {path:?}")]
 	Init { path: PathBuf },
+
+	#[error("Could not load albums of project at {path:?}")]
+	LoadAlbums { path: PathBuf },
 }
