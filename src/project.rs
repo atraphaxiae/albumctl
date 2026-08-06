@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
@@ -57,17 +58,25 @@ impl Project {
 		})
 	}
 
-	pub fn load_albums(&self) -> Result<Vec<Album>, ProjectError> {
+	pub fn load_albums(&self) -> Result<HashSet<Album>, ProjectError> {
 		let error = || ProjectError::LoadAlbums {
 			path: self.root.clone(),
 		};
 
-		list_dirs(&self.root)
-			.change_context_lazy(error)?
-			.into_iter()
-			.map(|dir| Album::load(&dir))
-			.collect::<Result<Vec<_>, _>>()
-			.change_context_lazy(error)
+		let mut albums = HashSet::<Album>::new();
+		for dir in list_dirs(&self.root).change_context_lazy(error)? {
+			let album = Album::load(&dir).change_context_lazy(error)?;
+			if let Some(original) = albums.get(&album) {
+				Err(error()).attach(format!(
+					"duplicate album {album} at {:?}, originally loaded from {:?}",
+					album.path(),
+					original.path()
+				))?;
+			}
+			albums.insert(album);
+		}
+
+		Ok(albums)
 	}
 }
 
