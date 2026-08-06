@@ -49,12 +49,12 @@ pub fn build(path: &Path) -> Result<(), CommandError> {
 
 #[derive(Debug, Error)]
 pub enum CommandError {
-	#[error("Failed to initialize albumctl source")]
+	#[error("Failed to initialize source")]
 	Init,
 
-	#[error("Failed to validate albumctl source")]
+	#[error("Failed to validate source")]
 	Check,
 
-	#[error("Failed to build albumctl source")]
+	#[error("Failed to build music library from source")]
 	Build,
 }

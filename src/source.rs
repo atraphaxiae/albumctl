@@ -159,18 +159,18 @@ pub struct SourceManifest {
 
 #[derive(Debug, Error)]
 pub enum SourceError {
-	#[error("Could not initialize albumctl source at {path:?}")]
+	#[error("Could not initialize source at {path:?}")]
 	Init { path: PathBuf },
 
-	#[error("Could not load albumctl source at {path:?}")]
+	#[error("Could not load source at {path:?}")]
 	Load { path: PathBuf },
 
 	#[error("Detected errors in source at {path:?}")]
 	Check { path: PathBuf },
 
-	#[error("Could not build source at {path:?}")]
+	#[error("Could not build from source at {path:?}")]
 	Build { path: PathBuf },
 
-	#[error("Could not load albums of source at {path:?}")]
+	#[error("Could not load albums from source at {path:?}")]
 	LoadAlbums { path: PathBuf },
 }

@@ -118,6 +118,6 @@ pub enum AlbumError {
 	#[error("Could not load album at {path:?}")]
 	Load { path: PathBuf },
 
-	#[error(r#"Could not load releases of album "{id}""#)]
+	#[error("Could not load releases of album \"{id}\"")]
 	LoadReleases { id: AlbumIdentifier },
 }
