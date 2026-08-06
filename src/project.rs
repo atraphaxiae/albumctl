@@ -86,11 +86,15 @@ impl Project {
 
 		let albums = self.load_albums().change_context_lazy(error)?;
 		for album in albums {
+			println!("Building album \"{album}\"");
+
 			let album_path = outdir.join(album.to_string());
 			ensure_dir(&album_path).change_context_lazy(error)?;
 
 			let releases = album.load_releases().change_context(error())?;
 			for release in releases {
+				println!("╰╴Building release \"{release}\"");
+
 				let release_path = album_path.join(release.to_string());
 				ensure_dir(&release_path).change_context_lazy(error)?;
 
