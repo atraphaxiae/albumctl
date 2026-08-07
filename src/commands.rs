@@ -14,7 +14,7 @@ pub fn init(path: &Path) -> Result<(), CommandError> {
 	Source::init(path).change_context(CommandError::Init)?;
 
 	success!(
-		"Successfully initialized albumctl source at {}",
+		"Successfully initialized source at {}",
 		path.display()
 	);
 	Ok(())
@@ -27,7 +27,7 @@ pub fn check(path: &Path) -> Result<(), CommandError> {
 	source.check().change_context(error())?;
 
 	success!(
-		"Successfully validated albumctl source at {}",
+		"Successfully validated source at {}",
 		path.display()
 	);
 	Ok(())
@@ -40,7 +40,7 @@ pub fn build(path: &Path) -> Result<(), CommandError> {
 	let outdir = source.build().change_context(error())?;
 
 	success!(
-		"Successfully built albumctl source at {}.\nOutput: {}",
+		"Successfully built music library from source at {}.\nOutput: {}",
 		path.display(),
 		outdir.display()
 	);
