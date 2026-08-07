@@ -68,6 +68,8 @@ cd albumctl
 cargo install --path .
 ```
 
+Ensure that Cargo's binary directory is in your `PATH` so that you can call `albumctl` directly.
+
 ## Quick Start
 Create a new `albumctl` source:
 
