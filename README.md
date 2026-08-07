@@ -60,7 +60,13 @@ the source unchanged. This generated library is disposable; if it is ever lost, 
 recreated using `albumctl build`.
 
 ## Installation
-`albumctl` is not yet available on any package manager, so it must be built from source:
+Install the latest release from [`crates.io`](https://crates.io/crates/albumctl):
+
+```sh
+cargo install albumctl
+```
+
+Or build the latest development version from source:
 
 ```sh
 git clone https://github.com/atraphaxiae/albumctl.git
@@ -68,7 +74,7 @@ cd albumctl
 cargo install --path .
 ```
 
-Ensure that Cargo's binary directory is in your `PATH` so that you can call `albumctl` directly.
+Ensure that Cargo's binary directory is in your `PATH` so that you can invoke `albumctl` directly.
 
 ## Quick Start
 Create a new `albumctl` source:
