@@ -5,7 +5,8 @@
 //!
 //! Here, we finally define the final structures that will own all the manifest data of the source.
 //! We consume the manifests here and rearrange their contents into a structure that makes more
-//! sense for the prepare and build process.
+//! sense for the prepare and build process. We also finally do duplicate album/release detection
+//! here.
 //!
 //! We are also avoiding any Serde attributes by having new structs for the data. We want this
 //! because Serde attributes such as `serde(flatten)` or `serde(tag = ...)` don't work with binary
@@ -18,13 +19,30 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
-use crate::source::{AlbumManifest, ConfigManifest, DiscManifest, ReleaseManifest, TrackManifest};
+use crate::source::{
+	AlbumManifest, AlbumSource, ConfigManifest, DiscManifest, ReleaseManifest, ReleaseSource,
+	Source, TrackManifest,
+};
 
 #[derive(Debug)]
 pub struct Model {
 	pub dir: PathBuf,
 	pub config: Config,
 	pub albums: Vec<AlbumModel>,
+}
+
+impl Model {
+	pub fn from_source(source: Source) -> Self {
+		Self {
+			dir: source.dir,
+			config: Config::from_manifest(source.config),
+			albums: source
+				.albums
+				.into_iter()
+				.map(AlbumModel::from_source)
+				.collect(),
+		}
+	}
 }
 
 #[derive(Debug)]
@@ -34,11 +52,37 @@ pub struct AlbumModel {
 	pub releases: Vec<ReleaseModel>,
 }
 
+impl AlbumModel {
+	pub fn from_source(source: AlbumSource) -> Self {
+		let album = Album::from_manifest(source.manifest);
+		Self {
+			dir: source.dir,
+			info: album.info,
+			releases: source
+				.releases
+				.into_iter()
+				.map(ReleaseModel::from_source)
+				.collect(),
+		}
+	}
+}
+
 #[derive(Debug)]
 pub struct ReleaseModel {
 	pub dir: PathBuf,
 	pub info: ReleaseInfo,
 	pub discs: Vec<Disc>,
+}
+
+impl ReleaseModel {
+	pub fn from_source(source: ReleaseSource) -> Self {
+		let release = Release::from_manifest(source.manifest);
+		Self {
+			dir: source.dir,
+			info: release.info,
+			discs: release.discs,
+		}
+	}
 }
 
 #[derive(Debug, Serialize)]
