@@ -14,5 +14,6 @@
 !/src/dir.rs
 !/src/filesystem.rs
 !/src/manifest.rs
+!/src/model.rs
 !/src/result.rs
 !/src/source.rs
