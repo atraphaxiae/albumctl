@@ -9,6 +9,7 @@
 use std::path::PathBuf;
 
 use serde::Deserialize;
+use thiserror::Error;
 
 #[derive(Debug)]
 pub struct Source {
@@ -62,4 +63,16 @@ pub struct DiscManifest {
 pub struct TrackManifest {
 	pub title: String,
 	pub file: PathBuf,
+}
+
+#[derive(Debug, Error)]
+pub enum SourceError {
+	#[error("Could not load source directory {dir:?}")]
+	SourceLoad { dir: PathBuf },
+
+	#[error("Could not load album directory {dir:?}")]
+	AlbumLoad { dir: PathBuf },
+
+	#[error("Could not load release directory {dir:?}")]
+	ReleaseLoad { dir: PathBuf }
 }
