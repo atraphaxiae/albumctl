@@ -3,7 +3,10 @@
 
 use std::path::{Path, PathBuf};
 
+use error_stack::ResultExt;
 use thiserror::Error;
+
+use crate::{filesystem::list_dirs, result::Result};
 
 pub struct SourceDir {
 	dir: PathBuf,
@@ -11,10 +14,46 @@ pub struct SourceDir {
 	albums: Vec<AlbumDir>,
 }
 
+impl SourceDir {
+	pub fn resolve(dir: &Path) -> Result<Self, DirError> {
+		let error = || DirError::SourceDirResolve {
+			dir: dir.to_path_buf(),
+		};
+
+		Ok(Self {
+			dir: dir.to_path_buf(),
+			config_file: dir.join("albumctl.toml"),
+			albums: list_dirs(dir)
+				.change_context_lazy(error)?
+				.into_iter()
+				.map(|album_dir| AlbumDir::resolve(&album_dir))
+				.collect::<Result<_, _>>()?,
+		})
+	}
+}
+
 pub struct AlbumDir {
 	dir: PathBuf,
 	manifest_file: PathBuf,
 	releases: Vec<ReleaseDir>,
+}
+
+impl AlbumDir {
+	pub fn resolve(dir: &Path) -> Result<Self, DirError> {
+		let error = || DirError::AlbumDirResolve {
+			dir: dir.to_path_buf(),
+		};
+
+		Ok(Self {
+			dir: dir.to_path_buf(),
+			manifest_file: dir.join("album.toml"),
+			releases: list_dirs(dir)
+				.change_context_lazy(error)?
+				.into_iter()
+				.map(|release_dir| ReleaseDir::resolve(&release_dir))
+				.collect(),
+		})
+	}
 }
 
 pub struct ReleaseDir {
