@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
 mod cli;
+mod dir;
 mod filesystem;
 mod result;
-mod tree;
 
 fn main() {}
