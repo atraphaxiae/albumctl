@@ -3,8 +3,12 @@
 
 //! Module for loading the source directory into source structures
 //!
-//! Here, we load the manifests referenced by SourceDir into Source. We are not yet concerned with
-//! duplicate album/release detection in this layer.
+//! Here, we load the manifest files referenced by SourceDir into Source. We are not yet concerned
+//! with duplicate album/release detection in this layer.
+//!
+//! We also define the manifests here that Serde will use for deserializing. This is not yet the
+//! final form of the data, as we need to strip some Serde attributes (e.g. `serde(flatten)` or
+//! `serde(tag = ...)`) for the data to be usable in the preparation and build process.
 
 use std::path::PathBuf;
 
