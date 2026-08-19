@@ -9,9 +9,9 @@ use thiserror::Error;
 use crate::{filesystem::list_dirs, result::Result};
 
 pub struct SourceDir {
-	dir: PathBuf,
-	config_file: PathBuf,
-	albums: Vec<AlbumDir>,
+	pub dir: PathBuf,
+	pub config_file: PathBuf,
+	pub albums: Vec<AlbumDir>,
 }
 
 impl SourceDir {
@@ -33,9 +33,9 @@ impl SourceDir {
 }
 
 pub struct AlbumDir {
-	dir: PathBuf,
-	manifest_file: PathBuf,
-	releases: Vec<ReleaseDir>,
+	pub dir: PathBuf,
+	pub manifest_file: PathBuf,
+	pub releases: Vec<ReleaseDir>,
 }
 
 impl AlbumDir {
@@ -57,8 +57,8 @@ impl AlbumDir {
 }
 
 pub struct ReleaseDir {
-	dir: PathBuf,
-	manifest_file: PathBuf,
+	pub dir: PathBuf,
+	pub manifest_file: PathBuf,
 }
 
 impl ReleaseDir {
