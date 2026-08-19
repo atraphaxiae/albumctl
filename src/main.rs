@@ -5,5 +5,6 @@ mod cli;
 mod dir;
 mod filesystem;
 mod result;
+mod source;
 
 fn main() {}
