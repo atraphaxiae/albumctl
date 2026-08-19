@@ -10,3 +10,4 @@
 
 !/src/
 !/src/main.rs
+!/src/cli.rs
