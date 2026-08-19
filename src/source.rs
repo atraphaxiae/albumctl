@@ -67,12 +67,12 @@ pub struct TrackManifest {
 
 #[derive(Debug, Error)]
 pub enum SourceError {
-	#[error("Could not load source directory {dir:?}")]
+	#[error("Could not load the source directory {dir:?}")]
 	SourceLoad { dir: PathBuf },
 
-	#[error("Could not load album directory {dir:?}")]
+	#[error("Could not load the album directory {dir:?}")]
 	AlbumLoad { dir: PathBuf },
 
-	#[error("Could not load release directory {dir:?}")]
+	#[error("Could not load the release directory {dir:?}")]
 	ReleaseLoad { dir: PathBuf }
 }
