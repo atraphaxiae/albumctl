@@ -10,15 +10,3 @@
 
 !/src/
 !/src/main.rs
-!/src/album.rs
-!/src/cli.rs
-!/src/commands.rs
-!/src/filesystem.rs
-!/src/manifest.rs
-!/src/mapping.rs
-!/src/print.rs
-!/src/release.rs
-!/src/result.rs
-!/src/run.rs
-!/src/source.rs
-!/src/tracklist.rs
