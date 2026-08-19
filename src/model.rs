@@ -1,6 +1,19 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+//! Module for converting source structures into the model structures
+//!
+//! Here, we finally define the final structures that will own all the manifest data of the source.
+//! We consume the manifests here and rearrange their contents into a structure that makes more
+//! sense for the prepare and build process.
+//!
+//! We are also avoiding any Serde attributes by having new structs for the data. We want this
+//! because Serde attributes such as `serde(flatten)` or `serde(tag = ...)` don't work with binary
+//! serializers, which we need to obtain a stable hash for use with the incremental build process.
+//!
+//! The model structures are the final structures which will own all of the manifest data. Anything
+//! from the prepare and build process will only have references to the data owned by the models.
+
 use std::path::PathBuf;
 
 use serde::Serialize;
