@@ -15,7 +15,9 @@
 //! The model structures are the final structures which will own all of the manifest data. Anything
 //! from the prepare and build process will only have references to the data owned by the models.
 
-use std::path::PathBuf;
+use std::{
+	cmp::Ordering, hash::{Hash, Hasher}, path::PathBuf
+};
 
 use serde::Serialize;
 
@@ -67,6 +69,32 @@ impl AlbumModel {
 	}
 }
 
+impl PartialEq for AlbumModel {
+	fn eq(&self, other: &Self) -> bool {
+		self.info.id == other.info.id
+	}
+}
+
+impl Eq for AlbumModel {}
+
+impl PartialOrd for AlbumModel {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		self.info.id.partial_cmp(&other.info.id)
+	}
+}
+
+impl Ord for AlbumModel {
+	fn cmp(&self, other: &Self) -> Ordering {
+		self.info.id.cmp(&other.info.id)
+	}
+}
+
+impl Hash for AlbumModel {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.info.id.hash(state);
+	}
+}
+
 #[derive(Debug)]
 pub struct ReleaseModel {
 	pub dir: PathBuf,
@@ -82,6 +110,32 @@ impl ReleaseModel {
 			info: release.info,
 			discs: release.discs,
 		}
+	}
+}
+
+impl PartialEq for ReleaseModel {
+	fn eq(&self, other: &Self) -> bool {
+		self.info.id == other.info.id
+	}
+}
+
+impl Eq for ReleaseModel {}
+
+impl PartialOrd for ReleaseModel {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		self.info.id.partial_cmp(&other.info.id)
+	}
+}
+
+impl Ord for ReleaseModel {
+	fn cmp(&self, other: &Self) -> Ordering {
+		self.info.id.cmp(&other.info.id)
+	}
+}
+
+impl Hash for ReleaseModel {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.info.id.hash(state);
 	}
 }
 
