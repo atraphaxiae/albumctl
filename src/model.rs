@@ -114,7 +114,7 @@ pub struct ReleaseId {
 	pub provenance: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct Disc {
 	pub info: DiscInfo,
 	pub tracks: Vec<Track>,
@@ -138,7 +138,7 @@ pub struct DiscInfo {
 	// will be used in the future
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct Track {
 	pub info: TrackInfo,
 	pub file: PathBuf,
