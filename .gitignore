@@ -11,5 +11,6 @@
 !/src/
 !/src/main.rs
 !/src/cli.rs
+!/src/filesystem.rs
 !/src/result.rs
 !/src/tree.rs
