@@ -13,5 +13,6 @@
 !/src/cli.rs
 !/src/dir.rs
 !/src/filesystem.rs
+!/src/manifest.rs
 !/src/result.rs
 !/src/source.rs

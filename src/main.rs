@@ -4,6 +4,7 @@
 mod cli;
 mod dir;
 mod filesystem;
+mod manifest;
 mod result;
 mod source;
 
