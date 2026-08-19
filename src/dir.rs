@@ -1,6 +1,38 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+//! Module for resolving the source directory structure.
+//!
+//! We are only concerned with resolving the structure of the source directory in this layer. No
+//! validation or file opening is done here.
+//!
+//! Given a source directory that looks like this:
+//! ```text
+//! /src
+//! ├── albumctl.toml
+//! └── Speak No Evil
+//!     ├── album.toml
+//!     └── MM33 Vinyl Rip
+//!         ├── release.toml
+//!         ├── 01 - Witch Hunt.flac
+//!         └── ...
+//! ```
+//!
+//! `SourceDir::resolve(path)` where path is `/src` will resolve it into this:
+//! ```text
+//! SourceDir
+//! ├── dir: /src
+//! ├── config_file: /src/albumctl.toml
+//! └── albums:
+//!     └── AlbumDir
+//!         ├── dir: /src/Speak No Evil
+//!         ├── manifest_file: /src/Speak No Evil/album.toml
+//!         └── releases:
+//!             └── ReleaseDir
+//!                 ├── dir: /src/Speak No Evil/MM33 Vinyl Rip
+//!                 └── manifest_file: /src/Speak No Evil/MM33 Vinyl Rip/release.toml
+//! ```
+
 use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
