@@ -5,6 +5,27 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
+#[derive(Debug)]
+pub struct Model {
+	pub dir: PathBuf,
+	pub config: Config,
+	pub albums: Vec<AlbumModel>,
+}
+
+#[derive(Debug)]
+pub struct AlbumModel {
+	pub dir: PathBuf,
+	pub info: AlbumInfo,
+	pub releases: Vec<ReleaseModel>,
+}
+
+#[derive(Debug)]
+pub struct ReleaseModel {
+	pub dir: PathBuf,
+	pub info: ReleaseInfo,
+	pub discs: Vec<Disc>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct Config {
 	pub output_dir: PathBuf,
