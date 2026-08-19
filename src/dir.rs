@@ -18,7 +18,7 @@
 //!         └── ...
 //! ```
 //!
-//! `SourceDir::resolve(path)` where path is `/src` will resolve it into this:
+//! `SourceDir::resolve(path)` where `path` is `/src` will resolve it into this:
 //! ```text
 //! SourceDir
 //! ├── dir: /src
@@ -40,6 +40,7 @@ use thiserror::Error;
 
 use crate::{filesystem::list_dirs, result::Result};
 
+#[derive(Debug)]
 pub struct SourceDir {
 	pub dir: PathBuf,
 	pub config_file: PathBuf,
@@ -64,6 +65,7 @@ impl SourceDir {
 	}
 }
 
+#[derive(Debug)]
 pub struct AlbumDir {
 	pub dir: PathBuf,
 	pub manifest_file: PathBuf,
@@ -88,6 +90,7 @@ impl AlbumDir {
 	}
 }
 
+#[derive(Debug)]
 pub struct ReleaseDir {
 	pub dir: PathBuf,
 	pub manifest_file: PathBuf,
