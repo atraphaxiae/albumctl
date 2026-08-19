@@ -29,8 +29,8 @@ pub struct AlbumId {
 
 #[derive(Debug, Serialize)]
 pub struct Release {
-	info: ReleaseInfo,
-	discs: Vec<Disc>,
+	pub info: ReleaseInfo,
+	pub discs: Vec<Disc>,
 }
 
 #[derive(Debug, Serialize)]
