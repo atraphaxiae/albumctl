@@ -8,14 +8,39 @@
 
 use std::path::PathBuf;
 
+use error_stack::ResultExt;
 use serde::Deserialize;
 use thiserror::Error;
+
+use crate::{
+	dir::{AlbumDir, ReleaseDir, SourceDir},
+	manifest::load_manifest,
+	result::Result,
+};
 
 #[derive(Debug)]
 pub struct Source {
 	pub dir: PathBuf,
 	pub config: ConfigManifest,
 	pub albums: Vec<AlbumSource>,
+}
+
+impl Source {
+	pub fn load(dir: &SourceDir) -> Result<Self, SourceError> {
+		let error = || SourceError::SourceLoad {
+			dir: dir.dir.clone(),
+		};
+
+		Ok(Self {
+			dir: dir.dir.clone(),
+			config: load_manifest(&dir.config_file).change_context_lazy(error)?,
+			albums: dir
+				.albums
+				.iter()
+				.map(|album_dir| AlbumSource::load(album_dir))
+				.collect::<Result<_, _>>()?,
+		})
+	}
 }
 
 #[derive(Debug)]
@@ -25,10 +50,41 @@ pub struct AlbumSource {
 	pub releases: Vec<ReleaseSource>,
 }
 
+impl AlbumSource {
+	pub fn load(dir: &AlbumDir) -> Result<Self, SourceError> {
+		let error = || SourceError::AlbumLoad {
+			dir: dir.dir.clone(),
+		};
+
+		Ok(Self {
+			dir: dir.dir.clone(),
+			manifest: load_manifest(&dir.manifest_file).change_context_lazy(error)?,
+			releases: dir
+				.releases
+				.iter()
+				.map(|release_dir| ReleaseSource::load(release_dir))
+				.collect::<Result<_, _>>()?,
+		})
+	}
+}
+
 #[derive(Debug)]
 pub struct ReleaseSource {
 	pub dir: PathBuf,
 	pub manifest: ReleaseManifest,
+}
+
+impl ReleaseSource {
+	pub fn load(dir: &ReleaseDir) -> Result<Self, SourceError> {
+		let error = || SourceError::ReleaseLoad {
+			dir: dir.dir.clone(),
+		};
+
+		Ok(Self {
+			dir: dir.dir.clone(),
+			manifest: load_manifest(&dir.manifest_file).change_context_lazy(error)?,
+		})
+	}
 }
 
 #[derive(Debug, Deserialize)]
@@ -74,5 +130,5 @@ pub enum SourceError {
 	AlbumLoad { dir: PathBuf },
 
 	#[error("Could not load the release directory {dir:?}")]
-	ReleaseLoad { dir: PathBuf }
+	ReleaseLoad { dir: PathBuf },
 }
