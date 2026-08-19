@@ -31,7 +31,7 @@ pub struct Config {
 	pub output_dir: PathBuf,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct Album {
 	pub info: AlbumInfo,
 }
@@ -48,7 +48,7 @@ pub struct AlbumId {
 	pub title: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct Release {
 	pub info: ReleaseInfo,
 	pub discs: Vec<Disc>,
