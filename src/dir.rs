@@ -49,7 +49,7 @@ pub struct SourceDir {
 
 impl SourceDir {
 	pub fn resolve(dir: &Path) -> Result<Self, DirError> {
-		let error = || DirError::SourceDirResolve {
+		let error = || DirError::SourceResolve {
 			dir: dir.to_path_buf(),
 		};
 
@@ -74,7 +74,7 @@ pub struct AlbumDir {
 
 impl AlbumDir {
 	pub fn resolve(dir: &Path) -> Result<Self, DirError> {
-		let error = || DirError::AlbumDirResolve {
+		let error = || DirError::AlbumResolve {
 			dir: dir.to_path_buf(),
 		};
 
@@ -107,9 +107,9 @@ impl ReleaseDir {
 
 #[derive(Debug, Error)]
 pub enum DirError {
-	#[error("Could not resolve {dir:?} as a source directory")]
-	SourceDirResolve { dir: PathBuf },
+	#[error("Could not resolve the source directory {dir:?}")]
+	SourceResolve { dir: PathBuf },
 
-	#[error("Could not resolve {dir:?} as an album directory")]
-	AlbumDirResolve { dir: PathBuf },
+	#[error("Could not resolve the album directory {dir:?}")]
+	AlbumResolve { dir: PathBuf },
 }
