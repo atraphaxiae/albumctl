@@ -5,6 +5,8 @@ use std::path::PathBuf;
 
 use serde::Serialize;
 
+use crate::source::{AlbumManifest, ConfigManifest, DiscManifest, ReleaseManifest, TrackManifest};
+
 #[derive(Debug)]
 pub struct Model {
 	pub dir: PathBuf,
@@ -31,9 +33,31 @@ pub struct Config {
 	pub output_dir: PathBuf,
 }
 
+impl Config {
+	pub fn from_manifest(manifest: ConfigManifest) -> Self {
+		Self {
+			output_dir: manifest.output_dir,
+		}
+	}
+}
+
 #[derive(Debug)]
 pub struct Album {
 	pub info: AlbumInfo,
+}
+
+impl Album {
+	pub fn from_manifest(manifest: AlbumManifest) -> Self {
+		Self {
+			info: AlbumInfo {
+				id: AlbumId {
+					artist: manifest.artist,
+					year: manifest.year,
+					title: manifest.title,
+				},
+			},
+		}
+	}
 }
 
 #[derive(Debug, Serialize)]
@@ -52,6 +76,28 @@ pub struct AlbumId {
 pub struct Release {
 	pub info: ReleaseInfo,
 	pub discs: Vec<Disc>,
+}
+
+impl Release {
+	pub fn from_manifest(manifest: ReleaseManifest) -> Self {
+		Self {
+			info: ReleaseInfo {
+				id: ReleaseId {
+					year: manifest.year,
+					catalog_number: manifest.catalog_number,
+					media_type: manifest.media_type,
+					audio_channels: manifest.audio_channels,
+					provenance: manifest.provenance,
+				},
+			},
+
+			discs: manifest
+				.discs
+				.into_iter()
+				.map(Disc::from_manifest)
+				.collect(),
+		}
+	}
 }
 
 #[derive(Debug, Serialize)]
@@ -74,6 +120,19 @@ pub struct Disc {
 	pub tracks: Vec<Track>,
 }
 
+impl Disc {
+	pub fn from_manifest(manifest: DiscManifest) -> Self {
+		Self {
+			info: DiscInfo {},
+			tracks: manifest
+				.tracks
+				.into_iter()
+				.map(Track::from_manifest)
+				.collect(),
+		}
+	}
+}
+
 #[derive(Debug, Serialize)]
 pub struct DiscInfo {
 	// will be used in the future
@@ -83,6 +142,18 @@ pub struct DiscInfo {
 pub struct Track {
 	pub info: TrackInfo,
 	pub file: PathBuf,
+}
+
+impl Track {
+	pub fn from_manifest(manifest: TrackManifest) -> Self {
+		Self {
+			info: TrackInfo {
+				title: manifest.title,
+			},
+
+			file: manifest.file,
+		}
+	}
 }
 
 #[derive(Debug, Serialize)]
