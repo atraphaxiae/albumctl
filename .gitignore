@@ -16,4 +16,5 @@
 !/src/manifest.rs
 !/src/model.rs
 !/src/result.rs
+!/src/run.rs
 !/src/source.rs

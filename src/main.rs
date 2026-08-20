@@ -7,6 +7,18 @@ mod filesystem;
 mod manifest;
 mod model;
 mod result;
+mod run;
 mod source;
 
-fn main() {}
+use std::process::ExitCode;
+
+use crate::run::run;
+
+fn main() -> ExitCode {
+	if let Err(e) = run() {
+		eprintln!("{e:?}");
+		ExitCode::FAILURE
+	} else {
+		ExitCode::SUCCESS
+	}
+}
