@@ -10,7 +10,6 @@
 
 !/src/
 !/src/main.rs
-!/src/build.rs
 !/src/cli.rs
 !/src/command.rs
 !/src/dir.rs
@@ -20,3 +19,7 @@
 !/src/result.rs
 !/src/run.rs
 !/src/source.rs
+
+!/src/build.rs
+!/src/build/
+!/src/build/prepare.rs
