@@ -21,11 +21,11 @@ use crate::{
 
 #[derive(Debug)]
 pub struct RawUnit<'a> {
-	config: &'a Config,
-	album_info: &'a AlbumInfo,
-	release_info: &'a ReleaseInfo,
-	tracks: Vec<UnitTrack<'a>>,
-	hash: Hash,
+	pub config: &'a Config,
+	pub album_info: &'a AlbumInfo,
+	pub release_info: &'a ReleaseInfo,
+	pub tracks: Vec<UnitTrack<'a>>,
+	pub hash: Hash,
 }
 
 impl<'a> RawUnit<'a> {
