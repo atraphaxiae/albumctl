@@ -26,3 +26,4 @@
 !/src/build/normalize.rs
 !/src/build/prepare.rs
 !/src/build/process.rs
+!/src/build/raw.rs

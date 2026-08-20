@@ -6,12 +6,13 @@ use std::path::PathBuf;
 use blake3::Hash;
 use serde::{Deserialize, Serialize};
 
-use crate::model::{DiscInfo, Model, TrackInfo};
+use crate::model::{AlbumInfo, Config, DiscInfo, Model, ReleaseInfo, TrackInfo};
 
 pub mod finalize;
 pub mod normalize;
 pub mod prepare;
 pub mod process;
+pub mod raw;
 
 #[derive(Debug)]
 pub struct Builder {
@@ -31,6 +32,14 @@ pub struct UnitTrack<'a> {
 	pub disc_info: &'a DiscInfo,
 	pub track_info: &'a TrackInfo,
 	pub file: PathBuf,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UnitFingerprint<'a> {
+	config: &'a Config,
+	album_info: &'a AlbumInfo,
+	release_info: &'a ReleaseInfo,
+	tracks: &'a [UnitTrack<'a>],
 }
 
 #[derive(Debug, Serialize, Deserialize)]
