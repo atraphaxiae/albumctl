@@ -26,7 +26,7 @@ pub struct PreparedUnit<'a> {
 }
 
 impl<'a> PreparedUnit<'a> {
-	pub fn new(mut unit: RawUnit<'a>) -> Result<Self, PrepareError> {
+	pub fn new(unit: RawUnit<'a>) -> Result<Self, PrepareError> {
 		let error = || PrepareError::PrepareUnit {
 			album: unit.album_info.id.clone(),
 			release: unit.release_info.id.clone(),
