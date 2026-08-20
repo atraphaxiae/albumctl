@@ -14,8 +14,8 @@ use crate::{
 pub fn run() -> Result<(), RunError> {
 	let args = Cli::parse();
 	match args.command {
-		Command::Build { dir } => check(&dir).change_context(RunError)?,
-		Command::Check { dir } => build(&dir).change_context(RunError)?,
+		Command::Check { dir } => check(&dir).change_context(RunError)?,
+		Command::Build { dir } => build(&dir).change_context(RunError)?,
 	}
 
 	Ok(())
