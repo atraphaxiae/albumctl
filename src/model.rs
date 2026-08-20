@@ -3,7 +3,7 @@
 
 //! Module for converting source structures into the model structures
 //!
-//! Here, we finally define the final structures that will own all the manifest data of the source.
+//! Here, we define the model structures that will own all the manifest data of the source.
 //! We consume the manifests here and rearrange their contents into a structure that makes more
 //! sense for the prepare and build process. We also finally do duplicate album/release detection
 //! here.
@@ -16,7 +16,9 @@
 //! from the prepare and build process will only have references to the data owned by the models.
 
 use std::{
-	cmp::Ordering, hash::{Hash, Hasher}, path::PathBuf
+	cmp::Ordering,
+	hash::{Hash, Hasher},
+	path::PathBuf,
 };
 
 use serde::Serialize;
