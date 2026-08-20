@@ -62,7 +62,7 @@ pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 
 	io::copy(&mut reader, &mut writer)
 		.change_context_lazy(error)
-		.attach_with(|| format!("while copying from {from:?} to {to:?}"));
+		.attach_with(|| format!("while copying from {from:?} to {to:?}"))?;
 
 	Ok(())
 }
