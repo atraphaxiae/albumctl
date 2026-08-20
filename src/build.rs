@@ -12,6 +12,8 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
+	build::raw::RawUnit,
+	filesystem::require_file,
 	model::{AlbumInfo, Config, DiscInfo, Model, ReleaseInfo, TrackInfo},
 	result::Result,
 };
@@ -32,7 +34,31 @@ impl Builder {
 		Self { model }
 	}
 
-	pub fn check(&self) -> Result<
+	pub fn check(&self) -> Result<(), BuildError> {
+		let error = || BuildError::Check {
+			dir: self.model.dir.clone(),
+		};
+
+		// Simply check if the hash can be calculated, and if the source files are actually there
+		for album in &self.model.albums {
+			for release in &album.releases {
+				let unit = RawUnit::new(
+					&self.model.config,
+					&album.info,
+					&release.info,
+					&release.discs,
+					&self.model.dir,
+				)
+				.change_context_lazy(error)?;
+
+				for track in unit.tracks {
+					require_file(&track.file).change_context_lazy(error)?;
+				}
+			}
+		}
+
+		Ok(())
+	}
 }
 
 #[derive(Debug, Serialize)]
@@ -86,6 +112,12 @@ pub struct IndexEntry {
 
 #[derive(Debug, Error)]
 pub enum BuildError {
+	#[error("Errors were detected in source directory {dir:?}")]
+	Check { dir: PathBuf },
+
+	#[error("Could not build source directory {dir:?}")]
+	Build { dir: PathBuf },
+
 	#[error("Could not get filename of {file:?}")]
 	GetFileName { file: PathBuf },
 }
