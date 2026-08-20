@@ -50,5 +50,5 @@ pub struct Index {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct IndexEntry {
 	dir: PathBuf,
-	unit_hash: Hash,
+	hash: Hash,
 }
