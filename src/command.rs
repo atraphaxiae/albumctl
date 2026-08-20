@@ -38,9 +38,9 @@ pub fn build(dir: &Path) -> Result<(), CommandError> {
 
 #[derive(Debug, Error)]
 pub enum CommandError {
-	#[error("Errors were detected in source directory {dir:?}")]
+	#[error("Failed to validate source directory {dir:?}")]
 	Check { dir: PathBuf },
 
-	#[error("Could not build source directory {dir:?}")]
+	#[error("Failed to build source directory {dir:?}")]
 	Build { dir: PathBuf },
 }

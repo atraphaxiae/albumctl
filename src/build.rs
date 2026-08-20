@@ -31,6 +31,8 @@ impl Builder {
 	pub fn new(model: Model) -> Self {
 		Self { model }
 	}
+
+	pub fn check(&self) -> Result<
 }
 
 #[derive(Debug, Serialize)]
