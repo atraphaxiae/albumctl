@@ -21,9 +21,9 @@ impl Builder {
 }
 
 pub struct UnitTrack<'a> {
-	disc_number: u16,
-	track_number: u16,
-	disc_info: &'a DiscInfo,
-	track_info: &'a TrackInfo,
-	file: PathBuf
+	pub disc_number: u16,
+	pub track_number: u16,
+	pub disc_info: &'a DiscInfo,
+	pub track_info: &'a TrackInfo,
+	pub file: PathBuf,
 }
