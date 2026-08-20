@@ -26,8 +26,8 @@ impl Builder {
 
 #[derive(Debug, Serialize)]
 pub struct UnitTrack<'a> {
-	pub disc_number: u16,
-	pub track_number: u16,
+	pub disc_index: u16,
+	pub track_index: u16,
 	pub disc_info: &'a DiscInfo,
 	pub track_info: &'a TrackInfo,
 	pub file: PathBuf,
