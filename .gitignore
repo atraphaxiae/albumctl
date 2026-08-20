@@ -22,4 +22,7 @@
 
 !/src/build.rs
 !/src/build/
+!/src/build/finalize.rs
+!/src/build/normalize.rs
 !/src/build/prepare.rs
+!/src/build/process.rs

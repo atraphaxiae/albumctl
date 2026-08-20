@@ -3,7 +3,10 @@
 
 use crate::model::Model;
 
+pub mod finalize;
+pub mod normalize;
 pub mod prepare;
+pub mod process;
 
 pub struct Builder {
 	model: Model,
