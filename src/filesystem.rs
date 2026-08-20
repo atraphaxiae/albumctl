@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
+	fs::{File, OpenOptions},
 	io,
 	path::{Path, PathBuf},
 };
@@ -42,8 +43,35 @@ pub fn list_dirs(dir: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	Ok(dirs)
 }
 
+pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::CopyFile {
+		from: from.to_path_buf(),
+		to: to.to_path_buf(),
+	};
+
+	let mut reader = File::open(from)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while opening {from:?}"))?;
+
+	let mut writer = OpenOptions::new()
+		.write(true)
+		.create_new(true)
+		.open(to)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while opening {to:?}"))?;
+
+	io::copy(&mut reader, &mut writer)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while copying from {from:?} to {to:?}"));
+
+	Ok(())
+}
+
 #[derive(Debug, Error)]
 pub enum FilesystemError {
 	#[error("Could not list the immediate child directories of {dir:?}")]
 	ListDirs { dir: PathBuf },
+
+	#[error("Could not copy file from {from:?} to {to:?}")]
+	CopyFile { from: PathBuf, to: PathBuf },
 }
