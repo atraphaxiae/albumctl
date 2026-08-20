@@ -3,7 +3,8 @@
 
 use std::path::PathBuf;
 
-use serde::Serialize;
+use blake3::Hash;
+use serde::{Deserialize, Serialize};
 
 use crate::model::{DiscInfo, Model, TrackInfo};
 
@@ -30,4 +31,15 @@ pub struct UnitTrack<'a> {
 	pub disc_info: &'a DiscInfo,
 	pub track_info: &'a TrackInfo,
 	pub file: PathBuf,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Index {
+	entries: Vec<IndexEntry>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IndexEntry {
+	dir: PathBuf,
+	unit_hash: Hash,
 }
