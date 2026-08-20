@@ -14,18 +14,30 @@
 //!
 //! The model structures are the final structures which will own all of the manifest data. Anything
 //! from the prepare and build process will only have references to the data owned by the models.
+//!
+//! Note that the `Hash` trait implementations for `AlbumModel` and `ReleaseModel` are only used
+//! for duplicate album/release detection, and should not be confused with the stable hash
+//! implementation.
 
 use std::{
 	cmp::Ordering,
+	collections::HashSet,
+	fmt::{self, Display, Formatter},
 	hash::{Hash, Hasher},
 	path::PathBuf,
 };
 
+use error_stack::ResultExt;
+use indoc::formatdoc;
 use serde::Serialize;
+use thiserror::Error;
 
-use crate::source::{
-	AlbumManifest, AlbumSource, ConfigManifest, DiscManifest, ReleaseManifest, ReleaseSource,
-	Source, TrackManifest,
+use crate::{
+	result::Result,
+	source::{
+		AlbumManifest, AlbumSource, ConfigManifest, DiscManifest, ReleaseManifest, ReleaseSource,
+		Source, TrackManifest,
+	},
 };
 
 #[derive(Debug)]
@@ -36,16 +48,40 @@ pub struct Model {
 }
 
 impl Model {
-	pub fn from_source(source: Source) -> Self {
-		Self {
-			dir: source.dir,
-			config: Config::from_manifest(source.config),
-			albums: source
-				.albums
-				.into_iter()
-				.map(AlbumModel::from_source)
-				.collect(),
+	pub fn from_source(source: Source) -> Result<Self, ModelError> {
+		let dir = source.dir.to_path_buf();
+		let error = || ModelError::ModelSource { dir: dir.clone() };
+
+		let config = Config::from_manifest(source.config);
+
+		// Error on duplicate albums
+		let mut albums = HashSet::<AlbumModel>::new();
+		for album_source in source.albums {
+			let album = AlbumModel::from_source(album_source)?;
+			if let Some(existing) = albums.get(&album) {
+				Err(error()).attach(formatdoc! {
+					"
+						duplicate albums of \"{}\" found at:
+							- {}
+							- {}
+					",
+					album.info.id,
+					existing.dir.display(),
+					album.dir.display(),
+				})?;
+			}
+
+			albums.insert(album);
 		}
+
+		let mut albums = albums.into_iter().collect::<Vec<_>>();
+		albums.sort();
+
+		Ok(Self {
+			dir,
+			config,
+			albums,
+		})
 	}
 }
 
@@ -57,17 +93,41 @@ pub struct AlbumModel {
 }
 
 impl AlbumModel {
-	pub fn from_source(source: AlbumSource) -> Self {
+	pub fn from_source(source: AlbumSource) -> Result<Self, ModelError> {
+		let dir = source.dir.to_path_buf();
+		let error = || ModelError::ModelAlbum { dir: dir.clone() };
+
 		let album = Album::from_manifest(source.manifest);
-		Self {
-			dir: source.dir,
-			info: album.info,
-			releases: source
-				.releases
-				.into_iter()
-				.map(ReleaseModel::from_source)
-				.collect(),
+		let info = album.info;
+
+		// Error on duplicate releases
+		let mut releases = HashSet::<ReleaseModel>::new();
+		for release_source in source.releases {
+			let release = ReleaseModel::from_source(release_source);
+			if let Some(existing) = releases.get(&release) {
+				Err(error()).attach(formatdoc! {
+					"
+						duplicate releases of \"{}\" found at:
+							- {}
+							- {}
+					",
+					release.info.id,
+					existing.dir.display(),
+					release.dir.display()
+				})?;
+			}
+
+			releases.insert(release);
 		}
+
+		let mut releases = releases.into_iter().collect::<Vec<_>>();
+		releases.sort();
+
+		Ok(Self {
+			dir,
+			info,
+			releases,
+		})
 	}
 }
 
@@ -185,6 +245,12 @@ pub struct AlbumId {
 	pub title: String,
 }
 
+impl Display for AlbumId {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(f, "{} - ({}) {}", self.artist, self.year, self.title)
+	}
+}
+
 #[derive(Debug)]
 pub struct Release {
 	pub info: ReleaseInfo,
@@ -225,6 +291,16 @@ pub struct ReleaseId {
 	pub media_type: String,
 	pub audio_channels: String,
 	pub provenance: String,
+}
+
+impl Display for ReleaseId {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		write!(
+			f,
+			"({}) {} [{}, {}, {}]",
+			self.year, self.catalog_number, self.media_type, self.audio_channels, self.provenance
+		)
+	}
 }
 
 #[derive(Debug)]
@@ -272,4 +348,13 @@ impl Track {
 #[derive(Debug, Serialize)]
 pub struct TrackInfo {
 	pub title: String,
+}
+
+#[derive(Debug, Error)]
+pub enum ModelError {
+	#[error("Could not model the source directory {dir:?}")]
+	ModelSource { dir: PathBuf },
+
+	#[error("Could not model the album directory {dir:?}")]
+	ModelAlbum { dir: PathBuf },
 }
