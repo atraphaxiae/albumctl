@@ -238,7 +238,7 @@ pub struct AlbumInfo {
 	pub id: AlbumId,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 pub struct AlbumId {
 	pub artist: String,
 	pub year: u16,
@@ -284,7 +284,7 @@ pub struct ReleaseInfo {
 	pub id: ReleaseId,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 pub struct ReleaseId {
 	pub year: u16,
 	pub catalog_number: String,
