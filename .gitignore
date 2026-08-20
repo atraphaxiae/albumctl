@@ -10,6 +10,7 @@
 
 !/src/
 !/src/main.rs
+!/src/build.rs
 !/src/cli.rs
 !/src/command.rs
 !/src/dir.rs

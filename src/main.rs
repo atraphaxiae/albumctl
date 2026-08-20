@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
+mod build;
 mod cli;
 mod command;
 mod dir;
