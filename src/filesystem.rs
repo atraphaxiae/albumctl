@@ -3,7 +3,7 @@
 
 use std::{
 	fs::{File, OpenOptions},
-	io,
+	io::{self, ErrorKind},
 	path::{Path, PathBuf},
 };
 
@@ -11,6 +11,23 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::result::Result;
+
+pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::RequireFile {
+		file: file.to_path_buf(),
+	};
+
+	match file.metadata() {
+		Ok(metadata) if metadata.is_file() => Ok(()),
+		Ok(_) => Err(error()).attach(format!("{file:?} is not a file")),
+		Err(e) if e.kind() == ErrorKind::NotFound => {
+			Err(error()).attach(format!("{file:?} does not exist"))
+		}
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while reading metadata of {file:?}")),
+	}
+}
 
 pub fn list_dirs(dir: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	let error = || FilesystemError::ListDirs {
@@ -69,6 +86,9 @@ pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
+	#[error("Expected a file at {file:?}")]
+	RequireFile { file: PathBuf },
+
 	#[error("Could not list the immediate child directories of {dir:?}")]
 	ListDirs { dir: PathBuf },
 
