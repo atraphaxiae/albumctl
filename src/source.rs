@@ -31,7 +31,7 @@ pub struct Source {
 
 impl Source {
 	pub fn load(dir: &SourceDir) -> Result<Self, SourceError> {
-		let error = || SourceError::SourceLoad {
+		let error = || SourceError::LoadSource {
 			dir: dir.dir.clone(),
 		};
 
@@ -56,7 +56,7 @@ pub struct AlbumSource {
 
 impl AlbumSource {
 	pub fn load(dir: &AlbumDir) -> Result<Self, SourceError> {
-		let error = || SourceError::AlbumLoad {
+		let error = || SourceError::LoadAlbum {
 			dir: dir.dir.clone(),
 		};
 
@@ -80,7 +80,7 @@ pub struct ReleaseSource {
 
 impl ReleaseSource {
 	pub fn load(dir: &ReleaseDir) -> Result<Self, SourceError> {
-		let error = || SourceError::ReleaseLoad {
+		let error = || SourceError::LoadRelease {
 			dir: dir.dir.clone(),
 		};
 
@@ -128,11 +128,11 @@ pub struct TrackManifest {
 #[derive(Debug, Error)]
 pub enum SourceError {
 	#[error("Could not load the source directory {dir:?}")]
-	SourceLoad { dir: PathBuf },
+	LoadSource { dir: PathBuf },
 
 	#[error("Could not load the album directory {dir:?}")]
-	AlbumLoad { dir: PathBuf },
+	LoadAlbum { dir: PathBuf },
 
 	#[error("Could not load the release directory {dir:?}")]
-	ReleaseLoad { dir: PathBuf },
+	LoadRelease { dir: PathBuf },
 }
