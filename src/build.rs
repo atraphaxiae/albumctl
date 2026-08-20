@@ -47,7 +47,7 @@ impl Builder {
 					&album.info,
 					&release.info,
 					&release.discs,
-					&self.model.dir,
+					&release.dir,
 				)
 				.change_context_lazy(error)?;
 
