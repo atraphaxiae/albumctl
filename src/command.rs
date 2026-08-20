@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use error_stack::ResultExt;
 use thiserror::Error;
 
-use crate::{dir::SourceDir, model::Model, result::Result, source::Source};
+use crate::{build::Builder, dir::SourceDir, model::Model, result::Result, source::Source};
 
 pub fn check(dir: &Path) -> Result<(), CommandError> {
 	let error = || CommandError::Check {
@@ -16,8 +16,8 @@ pub fn check(dir: &Path) -> Result<(), CommandError> {
 	let source_dir = SourceDir::resolve(dir).change_context_lazy(error)?;
 	let source = Source::load(&source_dir).change_context_lazy(error)?;
 	let model = Model::from_source(source).change_context_lazy(error)?;
-
-	dbg!(model);
+	let builder = Builder::new(model);
+	builder.check().change_context_lazy(error)?;
 
 	Ok(())
 }
