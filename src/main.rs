@@ -12,9 +12,13 @@ mod source;
 
 use std::process::ExitCode;
 
+use error_stack::{Report, fmt::ColorMode};
+
 use crate::run::run;
 
 fn main() -> ExitCode {
+	Report::set_color_mode(ColorMode::Color);
+
 	if let Err(e) = run() {
 		eprintln!("{e:?}");
 		ExitCode::FAILURE
