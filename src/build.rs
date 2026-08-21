@@ -13,7 +13,7 @@ use thiserror::Error;
 
 use crate::{
 	build::{normalize::NormalizedUnit, prepare::PreparedUnit, raw::RawUnit},
-	filesystem::require_file,
+	filesystem::{ensure_dir, require_file},
 	model::{AlbumInfo, Config, DiscInfo, Model, ReleaseInfo, TrackInfo},
 	result::Result,
 };
@@ -30,8 +30,14 @@ pub struct Builder {
 }
 
 impl Builder {
-	pub fn new(model: Model) -> Self {
-		Self { model }
+	pub fn new(model: Model) -> Result<Self, BuildError> {
+		let error = || BuildError::NewBuilder {
+			dir: model.dir.to_path_buf(),
+		};
+
+		ensure_dir(&model.dir.join(".albumctl")).change_context_lazy(error)?;
+
+		Ok(Self { model })
 	}
 
 	pub fn check(&self) -> Result<(), BuildError> {
@@ -138,6 +144,9 @@ pub struct IndexEntry {
 
 #[derive(Debug, Error)]
 pub enum BuildError {
+	#[error("Could not create builder to source directory {dir:?}")]
+	NewBuilder { dir: PathBuf },
+
 	#[error("Errors were detected in source directory {dir:?}")]
 	Check { dir: PathBuf },
 
