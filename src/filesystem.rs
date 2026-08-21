@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{File, OpenOptions},
+	fs::{File, OpenOptions, rename},
 	io::{self, ErrorKind},
 	path::{Path, PathBuf},
 };
@@ -12,6 +12,22 @@ use thiserror::Error;
 
 use crate::result::Result;
 
+/// Errors if there is either a directory or a file at `path`.
+pub fn require_absent(path: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::RequireAbsent {
+		path: path.to_path_buf(),
+	};
+
+	match path.try_exists() {
+		Ok(false) => Ok(()),
+		Ok(true) => Err(error()).attach(format!("{path:?} exists")),
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while checking if {path:?} exists")),
+	}
+}
+
+/// Errors if `file` is not a file
 pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::RequireFile {
 		file: file.to_path_buf(),
@@ -29,6 +45,7 @@ pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
 	}
 }
 
+/// Lists immediate child directories of `dir`
 pub fn list_dirs(dir: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	let error = || FilesystemError::ListDirs {
 		dir: dir.to_path_buf(),
@@ -60,6 +77,23 @@ pub fn list_dirs(dir: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	Ok(dirs)
 }
 
+/// Moves a file from `from` to `to`. Does not work if `from` and `to` are on different filesystems.
+/// This errors if `to` already exists, however this is a TOCTOU case and is not guaranteed.
+pub fn move_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::MoveFile {
+		from: from.to_path_buf(),
+		to: to.to_path_buf(),
+	};
+
+	require_absent(to).change_context_lazy(error)?;
+	rename(from, to)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while moving from {from:?} to {to:?}"))?;
+
+	Ok(())
+}
+
+/// Copies a file from `from` to `to`. This will error if `to` already exists.
 pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::CopyFile {
 		from: from.to_path_buf(),
@@ -86,11 +120,17 @@ pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
+	#[error("Expected no file or directory at {path:?}")]
+	RequireAbsent { path: PathBuf },
+
 	#[error("Expected a file at {file:?}")]
 	RequireFile { file: PathBuf },
 
 	#[error("Could not list the immediate child directories of {dir:?}")]
 	ListDirs { dir: PathBuf },
+
+	#[error("Could not move file from {from:?} to {to:?}")]
+	MoveFile { from: PathBuf, to: PathBuf },
 
 	#[error("Could not copy file from {from:?} to {to:?}")]
 	CopyFile { from: PathBuf, to: PathBuf },
