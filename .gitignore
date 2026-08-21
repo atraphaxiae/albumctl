@@ -10,15 +10,21 @@
 
 !/src/
 !/src/main.rs
-!/src/album.rs
 !/src/cli.rs
-!/src/commands.rs
+!/src/command.rs
+!/src/dir.rs
 !/src/filesystem.rs
 !/src/manifest.rs
-!/src/mapping.rs
+!/src/model.rs
 !/src/print.rs
-!/src/release.rs
 !/src/result.rs
 !/src/run.rs
 !/src/source.rs
-!/src/tracklist.rs
+
+!/src/build.rs
+!/src/build/
+!/src/build/finalize.rs
+!/src/build/normalize.rs
+!/src/build/prepare.rs
+!/src/build/process.rs
+!/src/build/raw.rs

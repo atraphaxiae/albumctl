@@ -5,17 +5,17 @@ use clap::Parser;
 use error_stack::ResultExt;
 use thiserror::Error;
 
-use crate::cli::{Cli, Command};
-use crate::commands::{build, check, init};
-use crate::result::Result;
+use crate::{
+	cli::{Cli, Command},
+	command::{build, check},
+	result::Result,
+};
 
 pub fn run() -> Result<(), RunError> {
 	let args = Cli::parse();
-
 	match args.command {
-		Command::Init { path } => init(&path).change_context(RunError)?,
-		Command::Check { path } => check(&path).change_context(RunError)?,
-		Command::Build { path } => build(&path).change_context(RunError)?,
+		Command::Check { dir } => check(&dir).change_context(RunError)?,
+		Command::Build { dir } => build(&dir).change_context(RunError)?,
 	}
 
 	Ok(())

@@ -6,7 +6,6 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
-#[command(about, version)]
 pub struct Cli {
 	#[command(subcommand)]
 	pub command: Command,
@@ -14,7 +13,6 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
-	Init { path: PathBuf },
-	Check { path: PathBuf },
-	Build { path: PathBuf },
+	Check { dir: PathBuf },
+	Build { dir: PathBuf },
 }
