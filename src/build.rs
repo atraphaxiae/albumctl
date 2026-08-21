@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
+	collections::HashMap,
 	ffi::OsStr,
 	path::{Path, PathBuf},
 };
@@ -16,7 +17,8 @@ use crate::{
 		finalize::FinalizedUnit, normalize::NormalizedUnit, prepare::PreparedUnit,
 		process::ProcessedUnit, raw::RawUnit,
 	},
-	filesystem::{ensure_dir, require_file},
+	filesystem::{delete_dir, ensure_dir, ensure_file, require_file},
+	manifest::{load_manifest, save_manifest},
 	model::{AlbumInfo, Config, DiscInfo, Model, ReleaseInfo, TrackInfo},
 	result::Result,
 };
@@ -72,8 +74,25 @@ impl Builder {
 			dir: self.model.dir.clone(),
 		};
 
-		ensure_dir(&self.model.config.output_dir.join(".albumctl")).change_context_lazy(error)?;
+		let build_dir = self.model.config.output_dir.join(".albumctl");
+		let index_file = build_dir.join("index.toml");
+		ensure_dir(&build_dir).change_context_lazy(error)?;
+		ensure_file(&index_file, Some("")).change_context_lazy(error)?;
 
+		let mut previous_index = load_manifest::<Index>(&index_file)
+			.change_context_lazy(error)?
+			.entries
+			.into_iter()
+			.map(|entry| (entry.hash, entry.dir))
+			.collect::<HashMap<_, _>>();
+
+		let mut current_index = Index {
+			entries: Vec::new(),
+		};
+
+		// Create the raw units. If a raw unit hash is in the previous index, remove it from there
+		// and insert it into the current index. If not, push it into raw_units.
+		let mut raw_units = Vec::new();
 		for album in &self.model.albums {
 			for release in &album.releases {
 				let raw = RawUnit::new(
@@ -85,14 +104,39 @@ impl Builder {
 				)
 				.change_context_lazy(error)?;
 
-				let prepared = PreparedUnit::new(raw).change_context_lazy(error)?;
-				let normalized = NormalizedUnit::new(prepared).change_context_lazy(error)?;
-				let processed = ProcessedUnit::new(normalized);
-				let finalized = FinalizedUnit::new(processed).change_context_lazy(error)?;
-
-				dbg!(finalized);
+				if let Some((hash, dir)) = previous_index.remove_entry(&raw.hash) {
+					current_index.entries.push(IndexEntry { dir, hash });
+				} else {
+					raw_units.push(raw);
+				}
 			}
 		}
+
+		// Delete all directories referenced by the previous index, *then* save the current index.
+		// This order is important because if any deletion fails, we can still resume the deletion
+		// on the next call of albumctl build since the index file hasn't been changed yet.
+		for (_, dir) in previous_index {
+			delete_dir(&dir).change_context_lazy(error)?;
+		}
+
+		save_manifest(&index_file, &current_index).change_context_lazy(error)?;
+
+		// Finally, build all of the units, writing to the index file with each success.
+		// TODO: In the scenario where the unit was successfully finalized, but save_manifest fails,
+		// the release is in the output directory but the index does not contain its hash and path.
+		// This means that the next build will fail because when finalizing, it will try to copy the
+		// files to the already existing output directory.
+		for raw in raw_units {
+			let prepared = PreparedUnit::new(raw).change_context_lazy(error)?;
+			let normalized = NormalizedUnit::new(prepared).change_context_lazy(error)?;
+			let processed = ProcessedUnit::new(normalized);
+			let finalized = FinalizedUnit::new(processed).change_context_lazy(error)?;
+
+			current_index.entries.push(IndexEntry { dir: finalized.dir, hash: finalized.hash });
+			save_manifest(&index_file, &current_index).change_context_lazy(error)?;
+		}
+
+		// We're DONE!!
 
 		Ok(())
 	}
