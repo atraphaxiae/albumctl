@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{File, OpenOptions, rename},
+	fs::{File, OpenOptions, create_dir_all, rename},
 	io::{self, ErrorKind},
 	path::{Path, PathBuf},
 };
@@ -27,7 +27,7 @@ pub fn require_absent(path: &Path) -> Result<(), FilesystemError> {
 	}
 }
 
-/// Errors if `file` is not a file
+/// Errors if `file` is not a file.
 pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::RequireFile {
 		file: file.to_path_buf(),
@@ -45,7 +45,20 @@ pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
 	}
 }
 
-/// Lists immediate child directories of `dir`
+/// Creates `dir` and all its missing parents. Does not error if the `dir` already exists.
+pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::EnsureDir {
+		dir: dir.to_path_buf(),
+	};
+
+	create_dir_all(dir)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while creating {dir:?}"))?;
+
+	Ok(())
+}
+
+/// Lists immediate child directories of `dir`.
 pub fn list_dirs(dir: &Path) -> Result<Vec<PathBuf>, FilesystemError> {
 	let error = || FilesystemError::ListDirs {
 		dir: dir.to_path_buf(),
@@ -125,6 +138,9 @@ pub enum FilesystemError {
 
 	#[error("Expected a file at {file:?}")]
 	RequireFile { file: PathBuf },
+
+	#[error("Could not ensure directory exists at {dir:?}")]
+	EnsureDir { dir: PathBuf },
 
 	#[error("Could not list the immediate child directories of {dir:?}")]
 	ListDirs { dir: PathBuf },
