@@ -113,6 +113,7 @@ impl Builder {
 		// Delete all directories referenced by the previous index, *then* save the current index.
 		// This order is important because if any deletion fails, we can still resume the deletion
 		// on the next call of albumctl build since the index file hasn't been changed yet.
+		println!("Deleting stale outputs");
 		for (_, dir) in previous_index {
 			delete_dir(&dir).change_context_lazy(error)?;
 		}

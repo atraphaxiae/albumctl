@@ -37,7 +37,7 @@ pub fn build(dir: &Path) -> Result<(), CommandError> {
 	let output_dir = builder.build().change_context_lazy(error)?;
 
 	success!(
-		"Successfully built source at {}.\nOutput: {}",
+		"Successfully built source at {}.\nOutput directory: {}",
 		dir.display(),
 		output_dir.display()
 	);
