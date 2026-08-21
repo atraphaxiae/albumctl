@@ -126,7 +126,10 @@ impl Builder {
 		// This means that the next build will fail because when finalizing, it will try to copy the
 		// files to the already existing output directory.
 		for raw in raw_units {
-			println!("Building \"{} - {}\"", raw.album_info.id, raw.release_info.id);
+			println!(
+				"Building \"{} - {}\"",
+				raw.album_info.id, raw.release_info.id
+			);
 			let prepared = PreparedUnit::new(raw).change_context_lazy(error)?;
 			let normalized = NormalizedUnit::new(prepared).change_context_lazy(error)?;
 			let processed = ProcessedUnit::new(normalized);
