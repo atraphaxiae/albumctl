@@ -35,15 +35,11 @@ pub struct Builder {
 }
 
 impl Builder {
-	pub fn new(model: Model) -> Result<Self, BuildError> {
-		let error = || BuildError::NewBuilder {
-			dir: model.dir.to_path_buf(),
-		};
-
-		Ok(Self { model })
+	pub fn new(model: Model) -> Self {
+		Self { model }
 	}
 
-	pub fn check(&self) -> Result<(), BuildError> {
+	pub fn check(self) -> Result<(), BuildError> {
 		let error = || BuildError::Check {
 			dir: self.model.dir.clone(),
 		};
@@ -69,7 +65,7 @@ impl Builder {
 		Ok(())
 	}
 
-	pub fn build(&self) -> Result<PathBuf, BuildError> {
+	pub fn build(self) -> Result<PathBuf, BuildError> {
 		let error = || BuildError::Build {
 			dir: self.model.dir.clone(),
 		};
@@ -196,9 +192,6 @@ pub struct IndexEntry {
 
 #[derive(Debug, Error)]
 pub enum BuildError {
-	#[error("Could not create builder to source directory {dir:?}")]
-	NewBuilder { dir: PathBuf },
-
 	#[error("Errors were detected in source directory {dir:?}")]
 	Check { dir: PathBuf },
 
