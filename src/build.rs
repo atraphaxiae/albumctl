@@ -35,8 +35,6 @@ impl Builder {
 			dir: model.dir.to_path_buf(),
 		};
 
-		ensure_dir(&model.config.output_dir.join(".albumctl")).change_context_lazy(error)?;
-
 		Ok(Self { model })
 	}
 
@@ -70,6 +68,8 @@ impl Builder {
 		let error = || BuildError::Build {
 			dir: self.model.dir.clone(),
 		};
+
+		ensure_dir(&self.model.config.output_dir.join(".albumctl")).change_context_lazy(error)?;
 
 		for album in &self.model.albums {
 			for release in &album.releases {
