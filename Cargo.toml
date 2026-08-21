@@ -4,6 +4,7 @@ version = "0.2.0"
 authors = ["Nile Jocson"]
 edition = "2024"
 description = "A declarative builder for your music library."
+repository = "https://github.com/atraphaxiae/albumctl"
 readme = "./README.md"
 license = "MPL-2.0"
 
