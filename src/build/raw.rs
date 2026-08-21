@@ -82,6 +82,6 @@ impl<'a> RawUnit<'a> {
 
 #[derive(Debug, Error)]
 pub enum RawError {
-	#[error("Could not create unit for release \"{album} - {release}\"")]
+	#[error("Could not create unit for \"{album} - {release}\"")]
 	NewUnit { album: AlbumId, release: ReleaseId },
 }

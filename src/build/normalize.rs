@@ -72,6 +72,6 @@ impl<'a> NormalizedUnit<'a> {
 
 #[derive(Debug, Error)]
 pub enum NormalizeError {
-	#[error("Could not normalize unit for release \"{album} - {release}\"")]
+	#[error("Could not normalize unit for \"{album} - {release}\"")]
 	NormalizeUnit { album: AlbumId, release: ReleaseId },
 }

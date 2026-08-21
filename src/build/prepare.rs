@@ -62,6 +62,6 @@ impl<'a> PreparedUnit<'a> {
 
 #[derive(Debug, Error)]
 pub enum PrepareError {
-	#[error("Could not prepare release \"{album} - {release}\"")]
+	#[error("Could not prepare unit for \"{album} - {release}\"")]
 	PrepareUnit { album: AlbumId, release: ReleaseId },
 }
