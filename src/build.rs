@@ -35,7 +35,7 @@ impl Builder {
 			dir: model.dir.to_path_buf(),
 		};
 
-		ensure_dir(&model.dir.join(".albumctl")).change_context_lazy(error)?;
+		ensure_dir(&model.config.output_dir.join(".albumctl")).change_context_lazy(error)?;
 
 		Ok(Self { model })
 	}
