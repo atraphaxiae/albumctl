@@ -6,7 +6,7 @@
 //! Here we calculate the unit hash, convert the Vec<Disc> representation to Vec<UnitTrack>, and
 //! resolve the paths of the audio files relative to the release directory of the unit.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use blake3::{Hash, hash};
 use error_stack::ResultExt;
@@ -21,6 +21,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct RawUnit<'a> {
+	pub dir: PathBuf,
 	pub config: &'a Config,
 	pub album_info: &'a AlbumInfo,
 	pub release_info: &'a ReleaseInfo,
@@ -66,7 +67,10 @@ impl<'a> RawUnit<'a> {
 		let fingerprint_bytes = to_stdvec(&fingerprint).change_context_lazy(error)?;
 		let hash = hash(&fingerprint_bytes);
 
+		let dir = config.output_dir.join(format!(".albumctl/{hash}"));
+
 		Ok(Self {
+			dir,
 			config,
 			album_info,
 			release_info,
