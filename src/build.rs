@@ -117,6 +117,10 @@ impl UnitTrack<'_> {
 		Ok(file_name)
 	}
 
+	pub fn extension(&self) -> Option<&OsStr> {
+		self.file.extension()
+	}
+
 	pub fn with_file(mut self, file: &Path) -> Self {
 		self.file = file.to_path_buf();
 		self

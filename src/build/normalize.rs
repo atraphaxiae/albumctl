@@ -47,7 +47,12 @@ impl<'a> NormalizedUnit<'a> {
 				track.track_index + 1,
 				track.track_info.title
 			);
-			let file = unit.dir.join(filename);
+
+			let file = unit
+				.dir
+				.join(filename)
+				.with_added_extension(track.extension().unwrap_or_default());
+
 			move_file(&track.file, &file).change_context_lazy(error)?;
 
 			let track = track.with_file(&file);
