@@ -128,7 +128,10 @@ impl Builder {
 			let processed = ProcessedUnit::new(normalized);
 			let finalized = FinalizedUnit::new(processed).change_context_lazy(error)?;
 
-			current_index.entries.push(IndexEntry { dir: finalized.dir, hash: finalized.hash });
+			current_index.entries.push(IndexEntry {
+				dir: finalized.dir,
+				hash: finalized.hash,
+			});
 			save_manifest(&index_file, &current_index).change_context_lazy(error)?;
 		}
 

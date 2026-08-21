@@ -21,7 +21,7 @@ pub fn check(dir: &Path) -> Result<(), CommandError> {
 	let builder = Builder::new(model);
 	builder.check().change_context_lazy(error)?;
 
-	success!("Successfully validated source at {}", dir.display());
+	success!("Successfully validated source at {}.", dir.display());
 	Ok(())
 }
 
@@ -34,7 +34,13 @@ pub fn build(dir: &Path) -> Result<(), CommandError> {
 	let source = Source::load(&source_dir).change_context_lazy(error)?;
 	let model = Model::from_source(source).change_context_lazy(error)?;
 	let builder = Builder::new(model);
-	builder.build().change_context_lazy(error)?;
+	let output_dir = builder.build().change_context_lazy(error)?;
+
+	success!(
+		"Successfully built source at {}.\nOutput: {}",
+		dir.display(),
+		output_dir.display()
+	);
 
 	Ok(())
 }
