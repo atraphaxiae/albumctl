@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-	build::raw::RawUnit,
+	build::{normalize::NormalizedUnit, prepare::PreparedUnit, raw::RawUnit},
 	filesystem::require_file,
 	model::{AlbumInfo, Config, DiscInfo, Model, ReleaseInfo, TrackInfo},
 	result::Result,
@@ -54,6 +54,32 @@ impl Builder {
 				for track in unit.tracks {
 					require_file(&track.file).change_context_lazy(error)?;
 				}
+			}
+		}
+
+		Ok(())
+	}
+
+	pub fn build(&self) -> Result<(), BuildError> {
+		let error = || BuildError::Build {
+			dir: self.model.dir.clone(),
+		};
+
+		for album in &self.model.albums {
+			for release in &album.releases {
+				let unit = RawUnit::new(
+					&self.model.config,
+					&album.info,
+					&release.info,
+					&release.discs,
+					&release.dir,
+				)
+				.change_context_lazy(error)?;
+
+				let unit = PreparedUnit::new(unit).change_context_lazy(error)?;
+				let unit = NormalizedUnit::new(unit).change_context_lazy(error)?;
+
+				dbg!(unit);
 			}
 		}
 
