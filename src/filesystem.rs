@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{File, OpenOptions, create_dir_all, rename},
+	fs::{File, OpenOptions, create_dir_all, remove_dir_all, rename},
 	io::{self, ErrorKind},
 	path::{Path, PathBuf},
 };
@@ -45,7 +45,7 @@ pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
 	}
 }
 
-/// Creates `dir` and all its missing parents. Does not error if the `dir` already exists.
+/// Creates `dir` and all its missing parents. Does not error if `dir` already exists.
 pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::EnsureDir {
 		dir: dir.to_path_buf(),
@@ -56,6 +56,21 @@ pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 		.attach_with(|| format!("while creating {dir:?}"))?;
 
 	Ok(())
+}
+
+/// Deletes `dir` and all of its contents. Does not error if `dir` doesn't exist.
+pub fn delete_dir(dir: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::DeleteDir {
+		dir: dir.to_path_buf(),
+	};
+
+	match remove_dir_all(dir) {
+		Ok(()) => Ok(()),
+		Err(e) if e.kind() == ErrorKind::NotFound => Ok(()),
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while deleting {dir:?}")),
+	}
 }
 
 /// Lists immediate child directories of `dir`.
@@ -141,6 +156,9 @@ pub enum FilesystemError {
 
 	#[error("Could not ensure directory exists at {dir:?}")]
 	EnsureDir { dir: PathBuf },
+
+	#[error("Could not delete directory at {dir:?}")]
+	DeleteDir { dir: PathBuf },
 
 	#[error("Could not list the immediate child directories of {dir:?}")]
 	ListDirs { dir: PathBuf },
