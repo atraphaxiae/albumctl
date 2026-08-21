@@ -12,7 +12,10 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-	build::{normalize::NormalizedUnit, prepare::PreparedUnit, process::ProcessedUnit, raw::RawUnit},
+	build::{
+		finalize::FinalizedUnit, normalize::NormalizedUnit, prepare::PreparedUnit,
+		process::ProcessedUnit, raw::RawUnit,
+	},
 	filesystem::{ensure_dir, require_file},
 	model::{AlbumInfo, Config, DiscInfo, Model, ReleaseInfo, TrackInfo},
 	result::Result,
@@ -85,8 +88,9 @@ impl Builder {
 				let prepared = PreparedUnit::new(raw).change_context_lazy(error)?;
 				let normalized = NormalizedUnit::new(prepared).change_context_lazy(error)?;
 				let processed = ProcessedUnit::new(normalized);
+				let finalized = FinalizedUnit::new(processed).change_context_lazy(error)?;
 
-				dbg!(processed);
+				dbg!(finalized);
 			}
 		}
 
