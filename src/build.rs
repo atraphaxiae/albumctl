@@ -73,7 +73,7 @@ impl Builder {
 		let build_dir = self.model.config.output_dir.join(".albumctl");
 		let index_file = build_dir.join("index.toml");
 		ensure_dir(&build_dir).change_context_lazy(error)?;
-		ensure_file(&index_file, Some("")).change_context_lazy(error)?;
+		ensure_file(&index_file, Some("entries = []")).change_context_lazy(error)?;
 
 		let mut previous_index = load_manifest::<Index>(&index_file)
 			.change_context_lazy(error)?
