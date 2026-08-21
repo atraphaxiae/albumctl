@@ -69,7 +69,7 @@ impl Builder {
 		Ok(())
 	}
 
-	pub fn build(&self) -> Result<(), BuildError> {
+	pub fn build(&self) -> Result<PathBuf, BuildError> {
 		let error = || BuildError::Build {
 			dir: self.model.dir.clone(),
 		};
@@ -137,8 +137,7 @@ impl Builder {
 		}
 
 		// We're DONE!!
-
-		Ok(())
+		Ok(self.model.config.output_dir.clone())
 	}
 }
 
