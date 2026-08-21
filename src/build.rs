@@ -47,6 +47,7 @@ impl Builder {
 		// Simply check if the hash can be calculated, and if the source files are actually there
 		for album in &self.model.albums {
 			for release in &album.releases {
+				println!("Checking \"{} - {}\"", album.info.id, release.info.id);
 				let unit = RawUnit::new(
 					&self.model.config,
 					&album.info,
@@ -101,6 +102,7 @@ impl Builder {
 				.change_context_lazy(error)?;
 
 				if let Some((hash, dir)) = previous_index.remove_entry(&raw.hash) {
+					println!("Skipping \"{} - {}\"", album.info.id, release.info.id);
 					current_index.entries.push(IndexEntry { dir, hash });
 				} else {
 					raw_units.push(raw);
@@ -123,6 +125,7 @@ impl Builder {
 		// This means that the next build will fail because when finalizing, it will try to copy the
 		// files to the already existing output directory.
 		for raw in raw_units {
+			println!("Building \"{} - {}\"", raw.album_info.id, raw.release_info.id);
 			let prepared = PreparedUnit::new(raw).change_context_lazy(error)?;
 			let normalized = NormalizedUnit::new(prepared).change_context_lazy(error)?;
 			let processed = ProcessedUnit::new(normalized);
