@@ -13,7 +13,7 @@ use thiserror::Error;
 
 use crate::{
 	build::{UnitTrack, raw::RawUnit},
-	filesystem::{copy_file, ensure_dir},
+	filesystem::{copy_file, delete_dir, ensure_dir},
 	model::{AlbumId, AlbumInfo, Config, ReleaseId, ReleaseInfo},
 	result::Result,
 };
@@ -35,8 +35,9 @@ impl<'a> PreparedUnit<'a> {
 			release: unit.release_info.id.clone(),
 		};
 
-		// Copy the source audio files to the unit build directory, while also updating the path
-		// stored in UnitTrack
+		// Delete the unit build directory from the previous build. Copy the source audio files to
+		// the unit build directory, while also updating the path stored in UnitTrack
+		delete_dir(&unit.dir).change_context_lazy(error)?;
 		ensure_dir(&unit.dir).change_context_lazy(error)?;
 
 		let mut tracks = Vec::new();
