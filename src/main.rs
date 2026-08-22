@@ -9,6 +9,7 @@ mod filesystem;
 mod manifest;
 mod model;
 mod print;
+mod process;
 mod result;
 mod run;
 mod source;

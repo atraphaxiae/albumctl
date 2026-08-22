@@ -28,3 +28,8 @@
 !/src/build/prepare.rs
 !/src/build/process.rs
 !/src/build/raw.rs
+
+!/src/process.rs
+!/src/process/
+!/src/process/convert.rs
+!/src/process/replaygain.rs
