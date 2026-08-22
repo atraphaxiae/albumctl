@@ -204,12 +204,16 @@ impl Hash for ReleaseModel {
 #[derive(Debug, Serialize)]
 pub struct Config {
 	pub output_dir: PathBuf,
+	pub ffmpeg_path: Option<PathBuf>,
+	pub rsgain_path: Option<PathBuf>,
 }
 
 impl Config {
 	pub fn from_manifest(manifest: ConfigManifest) -> Self {
 		Self {
 			output_dir: manifest.output_dir,
+			ffmpeg_path: manifest.ffmpeg_path,
+			rsgain_path: manifest.rsgain_path,
 		}
 	}
 }

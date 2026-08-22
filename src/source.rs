@@ -126,6 +126,8 @@ impl ReleaseSource {
 pub struct ConfigManifest {
 	pub output_dir: PathBuf,
 	pub ignored_dirs: Vec<PathBuf>,
+	pub ffmpeg_path: Option<PathBuf>,
+	pub rsgain_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
