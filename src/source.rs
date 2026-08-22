@@ -10,7 +10,7 @@
 //! final form of the data, as we need to strip some Serde attributes (e.g. `serde(flatten)` or
 //! `serde(tag = ...)`) for the data to be usable in the preparation and build process.
 
-use std::path::PathBuf;
+use std::{collections::HashSet, ops::Not, path::PathBuf};
 
 use error_stack::ResultExt;
 use serde::Deserialize;
@@ -35,14 +35,33 @@ impl Source {
 			dir: dir.dir.clone(),
 		};
 
+		let config =
+			load_manifest::<ConfigManifest>(&dir.config_file).change_context_lazy(error)?;
+
+		let ignored_dirs = config
+			.ignored_dirs
+			.iter()
+			.map(|ignored_dir| dir.dir.join(ignored_dir))
+			.collect::<HashSet<_>>();
+
+		// Don't load ignored folders
+		let albums = dir
+			.albums
+			.iter()
+			.filter_map(|album_dir| {
+				ignored_dirs
+					.contains(&album_dir.dir)
+					.not()
+					.then(|| AlbumSource::load(album_dir, &ignored_dirs))
+			})
+			.collect::<Result<_, _>>()?;
+
+		let dir = dir.dir.clone();
+
 		Ok(Self {
-			dir: dir.dir.clone(),
-			config: load_manifest(&dir.config_file).change_context_lazy(error)?,
-			albums: dir
-				.albums
-				.iter()
-				.map(|album_dir| AlbumSource::load(album_dir))
-				.collect::<Result<_, _>>()?,
+			dir,
+			config,
+			albums,
 		})
 	}
 }
@@ -55,19 +74,31 @@ pub struct AlbumSource {
 }
 
 impl AlbumSource {
-	pub fn load(dir: &AlbumDir) -> Result<Self, SourceError> {
+	pub fn load(dir: &AlbumDir, ignores: &HashSet<PathBuf>) -> Result<Self, SourceError> {
 		let error = || SourceError::LoadAlbum {
 			dir: dir.dir.clone(),
 		};
 
+		let manifest = load_manifest(&dir.manifest_file).change_context_lazy(error)?;
+
+		// Don't load ignored folders
+		let releases = dir
+			.releases
+			.iter()
+			.filter_map(|release_dir| {
+				ignores
+					.contains(&release_dir.dir)
+					.not()
+					.then(|| ReleaseSource::load(release_dir))
+			})
+			.collect::<Result<_, _>>()?;
+
+		let dir = dir.dir.clone();
+
 		Ok(Self {
-			dir: dir.dir.clone(),
-			manifest: load_manifest(&dir.manifest_file).change_context_lazy(error)?,
-			releases: dir
-				.releases
-				.iter()
-				.map(|release_dir| ReleaseSource::load(release_dir))
-				.collect::<Result<_, _>>()?,
+			dir,
+			manifest,
+			releases,
 		})
 	}
 }
@@ -94,6 +125,7 @@ impl ReleaseSource {
 #[derive(Debug, Deserialize)]
 pub struct ConfigManifest {
 	pub output_dir: PathBuf,
+	pub ignored_dirs: Vec<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
