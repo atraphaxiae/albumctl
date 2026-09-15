@@ -9,3 +9,4 @@ readme = "./README.md"
 license = "MPL-2.0"
 
 [dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
