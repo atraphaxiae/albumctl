@@ -6,19 +6,19 @@ use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
 pub struct RootModule {
-	output_directory: PathBuf,
-	children: Children,
+	pub output_directory: PathBuf,
+	pub children: Children,
 
 	#[serde(flatten)]
-	fields: HashMap<String, String>,
+	pub fields: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Module {
-	children: Children,
+	pub children: Children,
 
 	#[serde(flatten)]
-	fields: HashMap<String, String>,
+	pub fields: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]
