@@ -5,11 +5,18 @@ mod cli;
 mod manifest;
 mod module;
 mod result;
+mod run;
 
-use clap::Parser;
+use std::process::ExitCode;
 
-use crate::cli::Cli;
+use crate::run::run;
 
-fn main() {
-	let args = Cli::parse();
+fn main() -> ExitCode {
+	match run() {
+		Ok(()) => ExitCode::SUCCESS,
+		Err(e) => {
+			eprintln!("{e:?}");
+			ExitCode::FAILURE
+		}
+	}
 }
