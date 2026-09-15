@@ -5,10 +5,20 @@ use serde::Deserialize;
 use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
-pub struct Module {
+pub struct RootModule {
+	output_directory: PathBuf,
+	children: Children,
+
 	#[serde(flatten)]
 	fields: HashMap<String, String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Module {
 	children: Children,
+
+	#[serde(flatten)]
+	fields: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]
