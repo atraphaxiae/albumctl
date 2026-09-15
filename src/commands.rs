@@ -5,6 +5,8 @@ use std::path::{Path, PathBuf};
 
 use thiserror::Error;
 
+use crate::result::Result;
+
 pub fn build(dir: &Path) -> Result<(), CommandError> {
 	todo!()
 }
