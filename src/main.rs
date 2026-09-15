@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 mod cli;
+mod commands;
 mod manifest;
 mod module;
 mod result;
