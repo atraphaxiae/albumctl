@@ -13,7 +13,7 @@ pub struct Module {
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
-enum Children {
+pub enum Children {
 	Modules { modules: Vec<PathBuf> },
 	Files { files: Vec<PathBuf> },
 }
