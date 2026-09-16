@@ -19,8 +19,8 @@ use crate::{
 
 pub type BuildIndex = HashMap<Hash, PathBuf>;
 
-pub fn build(dir: &Path) -> Result<(), PrepareError> {
-	let error = || PrepareError::Build {
+pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
+	let error = || PrepareBuildError::Build {
 		dir: dir.to_path_buf(),
 	};
 
@@ -66,7 +66,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareError> {
 	Ok(())
 }
 
-pub fn check(dir: &Path) -> Result<(), PrepareError> {
+pub fn check(dir: &Path) -> Result<(), PrepareBuildError> {
 	todo!()
 }
 
@@ -80,8 +80,8 @@ fn recurse_modules(
 	total_units: &mut usize,
 	successful_modules: &mut usize,
 	successful_units: &mut usize,
-) -> Result<(), ModuleError> {
-	let error = || ModuleError {
+) -> Result<(), LoadModuleError> {
+	let error = || LoadModuleError {
 		dir: module_dir.to_path_buf(),
 	};
 
@@ -127,13 +127,13 @@ fn recurse_modules(
 }
 
 #[derive(Debug, Error)]
-#[error("Could not build module {dir:?}")]
-pub struct ModuleError {
+#[error("Could not load module {dir:?}")]
+pub struct LoadModuleError {
 	dir: PathBuf,
 }
 
 #[derive(Debug, Error)]
-pub enum PrepareError {
+pub enum PrepareBuildError {
 	#[error("Failed to build source directory {dir:?}")]
 	Build { dir: PathBuf },
 
