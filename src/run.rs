@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use crate::{
 	cli::{Cli, Command},
-	commands::{build, check},
+	build::prepare::{build, check},
 	result::Result,
 };
 
