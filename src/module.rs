@@ -7,7 +7,7 @@ use std::{collections::HashMap, path::PathBuf};
 #[derive(Debug, Deserialize)]
 pub struct RootModule {
 	pub output_directory: PathBuf,
-	pub children: Children,
+	pub modules: Vec<PathBuf>,
 
 	#[serde(flatten)]
 	pub fields: HashMap<String, String>,
