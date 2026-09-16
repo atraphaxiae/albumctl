@@ -60,7 +60,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareError> {
 	}
 
 	println!("Building source directory {dir:?} completed.");
-	println!("{successful_modules}/{total_modules} discovered modules read successfully.");
+	println!("{successful_modules}/{total_modules} discovered modules loaded successfully.");
 	println!("{successful_units}/{total_units} discovered units built successfully.");
 
 	Ok(())
