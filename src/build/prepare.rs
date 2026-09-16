@@ -42,7 +42,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareError> {
 	let mut successful_modules = 0_usize;
 	let mut successful_units = 0_usize;
 
-	for child_dir in root_module.modules {
+	for child_dir in root_module.children.modules {
 		let child_dir = dir.join(child_dir);
 		if let Err(e) = recurse_modules(
 			&child_dir,
