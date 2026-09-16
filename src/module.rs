@@ -19,10 +19,24 @@ pub struct RootChildren {
 #[derive(Debug, Deserialize)]
 pub struct Module {
 	pub metadata: Metadata,
+	pub tracklist: Option<Tracklist>,
 	pub children: Children,
 }
 
 pub type Metadata = HashMap<String, String>;
+
+pub type Tracklist = Vec<Disc>;
+
+#[derive(Debug, Deserialize)]
+pub struct Disc {
+	pub metadata: Metadata,
+	pub tracks: Vec<Track>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Track {
+	pub metadata: Metadata,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
