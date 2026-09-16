@@ -11,6 +11,7 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::{
+	build::incremental::incremental_build,
 	filesystem::{ensure_dir, ensure_file},
 	manifest::load_manifest,
 	module::{Children, Metadata, Module, RootModule},
@@ -116,10 +117,18 @@ fn recurse_modules(
 		}
 
 		Children::Files { files } => {
-			*total_units += 1;
-			// TODO!
-			println!("{metadata:#?}");
-			*successful_units += 1;
+			if let Err(e) = incremental_build(
+				module_dir,
+				&metadata,
+				files,
+				previous_index,
+				current_index,
+				index_file,
+				total_units,
+				successful_units,
+			) {
+				eprintln!("{e:?}");
+			};
 		}
 	}
 
