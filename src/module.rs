@@ -10,7 +10,7 @@ pub struct RootModule {
 	pub modules: Vec<PathBuf>,
 
 	#[serde(flatten)]
-	pub metadata: HashMap<String, String>,
+	pub metadata: Metadata,
 }
 
 #[derive(Debug, Deserialize)]
@@ -18,8 +18,10 @@ pub struct Module {
 	pub children: Children,
 
 	#[serde(flatten)]
-	pub metadata: HashMap<String, String>,
+	pub metadata: Metadata,
 }
+
+pub type Metadata = HashMap<String, String>;
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
