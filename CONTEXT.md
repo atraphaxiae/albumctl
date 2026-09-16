@@ -4,9 +4,9 @@ For v0.3.0, basically we have:
 
 1. User runs `albumctl build`
 2. Read `albumctl.toml` in the source directory, fail if it doesn't exist.
-3. Read `.albumctl/build.toml` in the output directory; if it doesn't exist, create a new empty
-	file and read that.
-4. Create an empty `current_build` HashMap index.
+3. Read `.albumctl/build.toml` in the output directory into `previous_index`; if it doesn't exist,
+	create a new empty file and read that.
+4. Create an empty `current_index` HashMap index.
 4. For each module in `modules`:
 5. Push all fields, overwriting if existing, into the `metadata` HashMap. Basically, this allows
 	child modules to inherit fields from its parent modules, or override it if wanted.
@@ -28,14 +28,14 @@ For v0.3.0, basically we have:
 	use mtime + size. We don't want to hash the actual contents since that would take a long time,
 	especially for very large files. Maybe we could provide a `--clean` option to force rebuild
 	everything.
-3. If that hash does NOT exist in the `previous_build` index, it means that either this is a new
+3. If that hash does NOT exist in `previous_index`, it means that either this is a new
 	unit, or an existing unit with a changed source. Either way, we build it. The per-unit build
-	process is detailed elsewhere. Then we push this into `current_build`, and save it into
+	process is detailed elsewhere. Then we push this into `current_index`, and save it into
 	`build.toml`. We want to save the index with every unit build success, so that the entire build
 	process isn't taken hostage by a single fallible write at the very end, invalidating the entire
 	(and possibly quite long) build.
 4. After building ALL units, we finally delete stale directories. How I'm thinking of doing this is
-	to load all paths of `current_build` into some kind of prefix tree. Then we recurse through the
+	to load all paths of `current_index` into some kind of prefix tree. Then we recurse through the
 	output directory, deleting directories if it doesn't match a prefix in the corresponding level
 	of the prefix tree. This *should* delete all unused and stale directories, keeping only the
 	built units intact. Of course, we should also keep the `.albumctl` directory. The point of this
