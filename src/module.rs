@@ -42,5 +42,12 @@ pub struct Track {
 #[serde(untagged)]
 pub enum Children {
 	Modules { modules: Vec<PathBuf> },
-	Files { files: Vec<PathBuf> },
+	Files { files: Vec<File> },
+}
+
+#[derive(Debug, Deserialize)]
+pub struct File {
+	file: PathBuf,
+	disc_number: usize,
+	track_number: usize,
 }
