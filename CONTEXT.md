@@ -4,8 +4,8 @@ For v0.3.0, basically we have:
 
 1. User runs `albumctl build`
 2. Read `albumctl.toml` in the source directory, fail if it doesn't exist.
-3. Read `.albumctl/build.toml` in the output directory; if it doesn't exist, just output an empty
-	`previous_build` HashMap index.
+3. Read `.albumctl/build.toml` in the output directory; if it doesn't exist, create a new empty
+	file and read that.
 4. Create an empty `current_build` HashMap index.
 4. For each module in `modules`:
 5. Push all fields, overwriting if existing, into the `metadata` HashMap. Basically, this allows
