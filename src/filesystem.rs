@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::OpenOptions,
+	fs::{OpenOptions, create_dir_all},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 };
@@ -49,6 +49,18 @@ pub fn ensure_file(file: &Path, content: Option<&str>) -> Result<(), FilesystemE
 	}
 }
 
+pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::EnsureDir {
+		dir: dir.to_path_buf(),
+	};
+
+	create_dir_all(dir)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while creating {dir:?} and all of its parents"))?;
+
+	Ok(())
+}
+
 #[derive(Debug, Error)]
 pub enum FilesystemError {
 	#[error("Expected a file at {file:?}")]
@@ -56,4 +68,7 @@ pub enum FilesystemError {
 
 	#[error("Could not ensure file exists at {file:?}")]
 	EnsureFile { file: PathBuf },
+
+	#[error("Could not ensure directory exists at {dir:?}")]
+	EnsureDir { dir: PathBuf },
 }
