@@ -12,7 +12,6 @@
 !/src/
 !/src/main.rs
 !/src/cli.rs
-!/src/commands.rs
 !/src/filesystem.rs
 !/src/manifest.rs
 !/src/module.rs
