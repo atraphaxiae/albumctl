@@ -1,11 +1,17 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use std::path::{Path, PathBuf};
+use std::{
+	collections::HashMap,
+	path::{Path, PathBuf},
+};
 
+use blake3::Hash;
 use thiserror::Error;
 
 use crate::result::Result;
+
+pub type BuildIndex = HashMap<Hash, PathBuf>;
 
 pub fn build(dir: &Path) -> Result<(), PrepareError> {
 	todo!()
