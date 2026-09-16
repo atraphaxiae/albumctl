@@ -8,17 +8,13 @@ use std::{collections::HashMap, path::PathBuf};
 pub struct RootModule {
 	pub output_directory: PathBuf,
 	pub modules: Vec<PathBuf>,
-
-	#[serde(flatten)]
 	pub metadata: Metadata,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Module {
-	pub children: Children,
-
-	#[serde(flatten)]
 	pub metadata: Metadata,
+	pub children: Children,
 }
 
 pub type Metadata = HashMap<String, String>;
