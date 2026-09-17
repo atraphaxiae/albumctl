@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{self, OpenOptions, copy, create_dir_all, rename},
+	fs::{OpenOptions, copy, create_dir_all, remove_dir_all, rename},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 	time::SystemTime,
@@ -84,6 +84,20 @@ pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 	Ok(())
 }
 
+pub fn delete_dir(dir: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::DeleteDir {
+		dir: dir.to_path_buf(),
+	};
+
+	match remove_dir_all(dir) {
+		Ok(()) => Ok(()),
+		Err(e) if e.kind() == ErrorKind::NotFound => Ok(()),
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while deleting {dir:?}")),
+	}
+}
+
 pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::CopyFile {
 		from: from.to_path_buf(),
@@ -127,6 +141,9 @@ pub enum FilesystemError {
 
 	#[error("Could not ensure directory exists at {dir:?}")]
 	EnsureDir { dir: PathBuf },
+
+	#[error("Could not delete directory {dir:?}")]
+	DeleteDir { dir: PathBuf },
 
 	#[error("Could not copy file from {from:?} to {to:?}")]
 	CopyFile { from: PathBuf, to: PathBuf },
