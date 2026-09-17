@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{OpenOptions, copy, create_dir_all, remove_dir_all, remove_file, rename},
+	fs::{FileType, OpenOptions, copy, create_dir_all, remove_dir_all, remove_file, rename},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 	time::SystemTime,
@@ -12,6 +12,22 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::result::Result;
+
+pub fn get_file_type(path: &Path) -> Result<FileType, FilesystemError> {
+	let error = || FilesystemError::GetFileType {
+		path: path.to_path_buf(),
+	};
+
+	match path.metadata() {
+		Ok(metadata) => Ok(metadata.file_type()),
+		Err(e) if e.kind() == ErrorKind::NotFound => {
+			Err(error()).attach(format!("{path:?} does not exist"))
+		}
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while reading metadata of {path:?}")),
+	}
+}
 
 pub fn get_mtime_size(path: &Path) -> Result<(SystemTime, u64), FilesystemError> {
 	let error = || FilesystemError::GetMtimeSize {
@@ -144,6 +160,9 @@ pub fn move_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
+	#[error("Could not get file type of {path:?}")]
+	GetFileType { path: PathBuf },
+
 	#[error("Could not get mtime and size of {path:?}")]
 	GetMtimeSize { path: PathBuf },
 
