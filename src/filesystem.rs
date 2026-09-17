@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{OpenOptions, create_dir_all},
+	fs::{self, OpenOptions, copy, create_dir_all},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 	time::SystemTime,
@@ -84,6 +84,19 @@ pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 	Ok(())
 }
 
+pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::CopyFile {
+		from: from.to_path_buf(),
+		to: to.to_path_buf(),
+	};
+
+	copy(from, to)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while copying file from {from:?} to {to:?}"))?;
+
+	Ok(())
+}
+
 #[derive(Debug, Error)]
 pub enum FilesystemError {
 	#[error("Could not get mtime and size of {path:?}")]
@@ -97,4 +110,7 @@ pub enum FilesystemError {
 
 	#[error("Could not ensure directory exists at {dir:?}")]
 	EnsureDir { dir: PathBuf },
+
+	#[error("Could not copy file from {from:?} to {to:?}")]
+	CopyFile { from: PathBuf, to: PathBuf },
 }
