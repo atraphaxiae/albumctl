@@ -9,6 +9,7 @@ use std::{
 	path::{Components, Path, PathBuf},
 };
 
+use colored::Colorize;
 use error_stack::ResultExt;
 use thiserror::Error;
 
@@ -72,22 +73,31 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 		eprintln!("{e:?}\n");
 	}
 
-	println!("Build completed.");
-	println!("├╴Source: {}", dir.display());
-	println!("├╴Output: {}", root_module.output_directory.display());
-	println!("│");
-	println!("├╴Modules: {}/{} loaded", successful_modules, total_modules);
+	println!("{}", "Build completed.".green().bold());
+	println!("├╴Source: {}", dir.display().to_string().cyan());
 	println!(
-		"├╴Units:   {} skipped, {} build, {} failed",
-		skipped_units,
-		built_units,
-		total_units - (skipped_units + built_units)
+		"├╴Output: {}",
+		root_module.output_directory.display().to_string().cyan()
+	);
+	println!("│");
+	println!(
+		"├╴Modules: {}",
+		format!("{}/{} loaded", successful_modules, total_modules).green()
+	);
+	println!(
+		"├╴Units:   {}, {}, {}",
+		format!("{} built", built_units).green(),
+		format!("{} skipped", skipped_units).cyan(),
+		format!("{} failed", total_units - (built_units + skipped_units)).red(),
 	);
 
 	if let Ok(deleted_items) = clean_result {
-		println!("╰╴Cleanup: {} stale items deleted", deleted_items);
+		println!(
+			"╰╴Cleanup: {}",
+			format!("{} stale items deleted", deleted_items).green()
+		);
 	} else {
-		println!("╰╴Cleanup: failed");
+		println!("╰╴Cleanup: {}", "failed".red());
 	}
 
 	Ok(())
