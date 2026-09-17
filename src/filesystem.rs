@@ -90,6 +90,10 @@ pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 		to: to.to_path_buf(),
 	};
 
+	if let Some(to_dir) = to.parent() {
+		ensure_dir(to_dir).change_context_lazy(error)?;
+	}
+
 	copy(from, to).change_context_lazy(error)?;
 
 	Ok(())
@@ -100,6 +104,10 @@ pub fn move_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 		from: from.to_path_buf(),
 		to: to.to_path_buf(),
 	};
+
+	if let Some(to_dir) = to.parent() {
+		ensure_dir(to_dir).change_context_lazy(error)?;
+	}
 
 	rename(from, to).change_context_lazy(error)?;
 
