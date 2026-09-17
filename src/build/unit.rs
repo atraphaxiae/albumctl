@@ -81,7 +81,7 @@ pub fn build_unit(
 		move_file(&from, &to).change_context_lazy(error)?;
 	}
 
-	todo!();
+	Ok(unit_output_dir)
 }
 
 fn get_track_field<'a>(
