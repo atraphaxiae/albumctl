@@ -182,14 +182,14 @@ fn recurse_modules(
 }
 
 #[derive(Debug)]
-struct DirTree {
-	root: DirTreeNode,
+struct FsTree {
+	root: FsTreeNode,
 }
 
-impl DirTree {
+impl FsTree {
 	fn new() -> Self {
 		Self {
-			root: DirTreeNode::new(),
+			root: FsTreeNode::new(),
 		}
 	}
 
@@ -198,18 +198,18 @@ impl DirTree {
 		self.root.insert(&mut components);
 	}
 
-	fn traverse(&self, dir: &Path) -> Option<&DirTreeNode> {
+	fn traverse(&self, dir: &Path) -> Option<&FsTreeNode> {
 		let mut components = dir.components();
 		self.root.traverse(&mut components)
 	}
 }
 
 #[derive(Debug)]
-struct DirTreeNode {
-	children: HashMap<OsString, DirTreeNode>,
+struct FsTreeNode {
+	children: HashMap<OsString, FsTreeNode>,
 }
 
-impl DirTreeNode {
+impl FsTreeNode {
 	fn new() -> Self {
 		Self {
 			children: HashMap::new(),
@@ -225,7 +225,7 @@ impl DirTreeNode {
 		let next = self
 			.children
 			.entry(component)
-			.or_insert_with(DirTreeNode::new);
+			.or_insert_with(FsTreeNode::new);
 
 		next.insert(components);
 	}
