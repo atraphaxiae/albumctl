@@ -63,13 +63,13 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 			&mut built_units,
 			&mut skipped_units,
 		) {
-			eprintln!("{e:?}");
+			eprintln!("{e:?}\n");
 		}
 	}
 
 	let clean_result = clean_output_dir(&current_index, &root_module.output_directory);
 	if let Err(e) = &clean_result {
-		eprintln!("{e:?}");
+		eprintln!("{e:?}\n");
 	}
 
 	println!("Building source directory {dir:?} completed.");
@@ -140,7 +140,7 @@ fn recurse_modules(
 					built_units,
 					skipped_units,
 				) {
-					eprintln!("{e:?}");
+					eprintln!("{e:?}\n");
 				}
 			}
 		}
@@ -183,7 +183,7 @@ fn recurse_modules(
 				built_units,
 				skipped_units,
 			) {
-				eprintln!("{e:?}");
+				eprintln!("{e:?}\n");
 			};
 		}
 	}
@@ -212,7 +212,7 @@ fn clean_output_dir(
 
 	while let Some((dir, node)) = stack.pop() {
 		if let Err(e) = clean_dir(&dir, node, &mut stack, &mut deleted_items, output_dir) {
-			eprintln!("{e:?}");
+			eprintln!("{e:?}\n");
 		}
 	}
 
@@ -235,7 +235,7 @@ fn clean_dir<'a>(
 		.attach_with(|| format!("while reading {dir:?}"))?
 	{
 		if let Err(e) = clean_entries(entry, dir, node, stack, deleted_items, output_dir) {
-			eprintln!("{e:?}");
+			eprintln!("{e:?}\n");
 		}
 	}
 
