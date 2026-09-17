@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	collections::HashMap,
+	collections::{HashMap, HashSet},
 	ffi::OsString,
 	fs::{DirEntry, read_dir},
 	io,
@@ -47,6 +47,15 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	let mut total_units = 0_usize;
 	let mut built_units = 0_usize;
 	let mut skipped_units = 0_usize;
+
+	let mut module_set = HashSet::new();
+	for module in &root_module.children.modules {
+		if !module_set.insert(module) {
+			return Err(error()).attach(format!(
+				"module declares child module {module:?} more than once"
+			));
+		}
+	}
 
 	for child_dir in root_module.children.modules {
 		let child_dir = dir.join(child_dir);
@@ -133,6 +142,15 @@ fn recurse_modules(
 
 	match module.children {
 		Children::Modules { modules } => {
+			let mut module_set = HashSet::new();
+			for module in &modules {
+				if !module_set.insert(module) {
+					return Err(error()).attach(format!(
+						"module declares child module {module:?} more than once"
+					));
+				}
+			}
+
 			*successful_modules += 1;
 			for child_dir in modules {
 				let child_dir = module_dir.join(child_dir);
