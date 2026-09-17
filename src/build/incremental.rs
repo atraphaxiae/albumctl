@@ -10,7 +10,7 @@ use thiserror::Error;
 
 use crate::{
 	build::{prepare::BuildIndex, unit::build_unit},
-	filesystem::get_mtime_size,
+	filesystem::{get_mtime_size, require_file},
 	manifest::save_manifest,
 	module::{Disc, File, Metadata},
 	result::Result,
@@ -66,17 +66,35 @@ pub fn incremental_build(
 	}
 	let hash = hasher.finalize();
 
-	if let Some(unit_output_files) = previous_index.get(&hash.to_string()) {
-		current_index.insert(hash.to_string(), unit_output_files.clone());
-		save_manifest(index_file, current_index).change_context_lazy(error)?;
-		*skipped_units += 1;
-	} else {
+	let mut invalidated_build = || -> Result<(), IncrementalBuildError> {
 		let unit_output_files =
 			build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
 				.change_context_lazy(error)?;
 		current_index.insert(hash.to_string(), unit_output_files);
 		save_manifest(index_file, current_index).change_context_lazy(error)?;
 		*built_units += 1;
+		Ok(())
+	};
+
+	if let Some(unit_output_files) = previous_index.get(&hash.to_string()) {
+		let all_outputs_exist = unit_output_files
+			.iter()
+			.all(|file| match file.try_exists() {
+				// if we don't know whether the files exist, we don't want to trigger a rebuild
+				Ok(true) => true,
+				Err(_) => true,
+				Ok(false) => false,
+			});
+
+		if all_outputs_exist {
+			current_index.insert(hash.to_string(), unit_output_files.clone());
+			save_manifest(index_file, current_index).change_context_lazy(error)?;
+			*skipped_units += 1;
+		} else {
+			invalidated_build()?;
+		}
+	} else {
+		invalidated_build()?;
 	}
 
 	Ok(())
