@@ -43,7 +43,7 @@ pub enum Children {
 	Files { files: Vec<File> },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct File {
 	pub file: PathBuf,
 	pub disc_number: usize,
