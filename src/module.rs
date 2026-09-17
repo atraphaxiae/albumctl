@@ -52,13 +52,3 @@ pub struct File {
 	pub disc_number: usize,
 	pub track_number: usize,
 }
-
-impl File {
-	pub fn with_new_file(&self, file: &Path) -> Self {
-		Self {
-			file: file.to_path_buf(),
-			disc_number: self.disc_number,
-			track_number: self.track_number,
-		}
-	}
-}
