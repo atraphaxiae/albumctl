@@ -14,7 +14,7 @@ use crate::{
 	build::incremental::incremental_build,
 	filesystem::{ensure_dir, ensure_file},
 	manifest::load_manifest,
-	module::{Children, Metadata, Module, RootModule},
+	module::{Children, Disc, Metadata, Module, RootModule},
 	result::Result,
 };
 
@@ -48,6 +48,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 		if let Err(e) = recurse_modules(
 			&child_dir,
 			&root_module.metadata,
+			None,
 			&previous_index,
 			&mut current_index,
 			&index_file,
@@ -74,6 +75,7 @@ pub fn check(dir: &Path) -> Result<(), PrepareBuildError> {
 fn recurse_modules(
 	module_dir: &Path,
 	parent_metadata: &Metadata,
+	parent_tracklist: Option<&[Disc]>,
 	previous_index: &BuildIndex,
 	current_index: &mut BuildIndex,
 	index_file: &Path,
@@ -94,6 +96,7 @@ fn recurse_modules(
 		.chain(module.metadata.iter())
 		.map(|(key, value)| (key.clone(), value.clone()))
 		.collect::<Metadata>();
+	let tracklist = module.discs.as_deref().or(parent_tracklist);
 	*successful_modules += 1;
 
 	match &module.children {
@@ -103,6 +106,7 @@ fn recurse_modules(
 				if let Err(e) = recurse_modules(
 					&child_dir,
 					&metadata,
+					tracklist,
 					previous_index,
 					current_index,
 					index_file,
@@ -117,9 +121,16 @@ fn recurse_modules(
 		}
 
 		Children::Files { files } => {
+			let Some(tracklist) = tracklist else {
+				return Err(error()).attach(
+					"a tracklist is required to be defined in at least one module in this lineage for this unit to be built",
+				);
+			};
+
 			if let Err(e) = incremental_build(
 				module_dir,
 				&metadata,
+				tracklist,
 				files,
 				previous_index,
 				current_index,

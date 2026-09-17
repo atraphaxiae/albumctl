@@ -7,13 +7,14 @@ use thiserror::Error;
 
 use crate::{
 	build::prepare::BuildIndex,
-	module::{File, Metadata},
+	module::{Disc, File, Metadata},
 	result::Result,
 };
 
 pub fn incremental_build(
 	module_dir: &Path,
 	metadata: &Metadata,
+	tracklist: &[Disc],
 	files: &[File],
 	previous_index: &BuildIndex,
 	current_index: &mut BuildIndex,

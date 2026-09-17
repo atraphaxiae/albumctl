@@ -19,13 +19,11 @@ pub struct RootChildren {
 #[derive(Debug, Deserialize)]
 pub struct Module {
 	pub metadata: Metadata,
-	pub tracklist: Option<Tracklist>,
+	pub discs: Option<Vec<Disc>>,
 	pub children: Children,
 }
 
 pub type Metadata = HashMap<String, String>;
-
-pub type Tracklist = Vec<Disc>;
 
 #[derive(Debug, Deserialize)]
 pub struct Disc {
