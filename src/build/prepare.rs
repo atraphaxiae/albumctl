@@ -18,7 +18,7 @@ use crate::{
 	result::Result,
 };
 
-pub type BuildIndex = HashMap<Hash, PathBuf>;
+pub type BuildIndex = HashMap<String, PathBuf>;
 
 pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	let error = || PrepareBuildError::Build {

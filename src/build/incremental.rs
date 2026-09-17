@@ -65,12 +65,12 @@ pub fn incremental_build(
 	}
 	let hash = hasher.finalize();
 
-	let unit_output_dir = match previous_index.get(&hash) {
+	let unit_output_dir = match previous_index.get(&hash.to_string()) {
 		Some(dir) => dir.clone(),
 		None => build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
 			.change_context_lazy(error)?,
 	};
-	current_index.insert(hash, unit_output_dir);
+	current_index.insert(hash.to_string(), unit_output_dir);
 	save_manifest(index_file, current_index).change_context_lazy(error)?;
 
 	*successful_units += 1;
