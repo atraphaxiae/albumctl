@@ -90,9 +90,7 @@ pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 		to: to.to_path_buf(),
 	};
 
-	copy(from, to)
-		.change_context_lazy(error)
-		.attach_with(|| format!("while copying file from {from:?} to {to:?}"))?;
+	copy(from, to).change_context_lazy(error)?;
 
 	Ok(())
 }
@@ -103,9 +101,7 @@ pub fn move_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 		to: to.to_path_buf(),
 	};
 
-	rename(from, to)
-		.change_context_lazy(error)
-		.attach_with(|| format!("while moving file from {from:?} to {to:?}"))?;
+	rename(from, to).change_context_lazy(error)?;
 
 	Ok(())
 }
