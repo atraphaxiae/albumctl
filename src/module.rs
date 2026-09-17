@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::BTreeMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
 pub struct RootModule {
@@ -23,7 +23,7 @@ pub struct Module {
 	pub children: Children,
 }
 
-pub type Metadata = HashMap<String, String>;
+pub type Metadata = BTreeMap<String, String>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Disc {
