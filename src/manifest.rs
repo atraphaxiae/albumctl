@@ -24,7 +24,7 @@ pub fn load_manifest<T: DeserializeOwned>(file: &Path) -> Result<T, ManifestErro
 
 	let manifest = from_str(&data)
 		.change_context_lazy(error)
-		.attach_with(|| "while parsing the contents of {file:?} as TOML")?;
+		.attach_with(|| format!("while parsing the contents of {file:?} as TOML"))?;
 
 	Ok(manifest)
 }
