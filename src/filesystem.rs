@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{OpenOptions, copy, create_dir_all, remove_dir_all, rename},
+	fs::{OpenOptions, copy, create_dir_all, remove_dir_all, remove_file, rename},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 	time::SystemTime,
@@ -84,18 +84,32 @@ pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 	Ok(())
 }
 
-pub fn delete_dir(dir: &Path) -> Result<(), FilesystemError> {
-	let error = || FilesystemError::DeleteDir {
-		dir: dir.to_path_buf(),
+pub fn delete(path: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::Delete {
+		path: path.to_path_buf(),
 	};
 
-	match remove_dir_all(dir) {
-		Ok(()) => Ok(()),
-		Err(e) if e.kind() == ErrorKind::NotFound => Ok(()),
-		Err(e) => Err(e)
-			.change_context(error())
-			.attach(format!("while deleting {dir:?}")),
+	let metadata = match path.metadata() {
+		Ok(metadata) => metadata,
+		Err(e) if e.kind() == ErrorKind::NotFound => return Ok(()),
+		Err(e) => {
+			return Err(e)
+				.change_context(error())
+				.attach("while reading metadata of path");
+		}
+	};
+
+	if metadata.is_file() {
+		remove_file(path)
+			.change_context_lazy(error)
+			.attach_with(|| format!("while deleting {path:?}"))?;
+	} else if metadata.is_dir() {
+		remove_dir_all(path)
+			.change_context_lazy(error)
+			.attach_with(|| format!("while deleting {path:?}"))?;
 	}
+
+	Ok(())
 }
 
 pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
@@ -142,8 +156,8 @@ pub enum FilesystemError {
 	#[error("Could not ensure directory exists at {dir:?}")]
 	EnsureDir { dir: PathBuf },
 
-	#[error("Could not delete directory {dir:?}")]
-	DeleteDir { dir: PathBuf },
+	#[error("Could not delete {path:?}")]
+	Delete { path: PathBuf },
 
 	#[error("Could not copy file from {from:?} to {to:?}")]
 	CopyFile { from: PathBuf, to: PathBuf },
