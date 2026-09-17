@@ -3,10 +3,10 @@
 
 use std::{
 	collections::HashMap,
-	path::{Path, PathBuf},
+	ffi::OsString,
+	path::{Components, Path, PathBuf},
 };
 
-use blake3::Hash;
 use error_stack::ResultExt;
 use thiserror::Error;
 
@@ -69,7 +69,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	println!("Output: {:?}", &root_module.output_directory);
 	println!("{successful_modules}/{total_modules} discovered modules loaded successfully.");
 	println!(
-		"{} built, {} skipped, {} failed, out of {} discovered units",
+		"{} built, {} skipped, {} failed, out of {} discovered units.",
 		built_units,
 		skipped_units,
 		total_units - (built_units + skipped_units),
@@ -179,6 +179,67 @@ fn recurse_modules(
 	}
 
 	Ok(())
+}
+
+#[derive(Debug)]
+struct DirTree {
+	root: DirTreeNode,
+}
+
+impl DirTree {
+	fn new() -> Self {
+		Self {
+			root: DirTreeNode::new(),
+		}
+	}
+
+	fn insert(&mut self, dir: &Path) {
+		let mut components = dir.components();
+		self.root.insert(&mut components);
+	}
+
+	fn traverse(&self, dir: &Path) -> Option<&DirTreeNode> {
+		let mut components = dir.components();
+		self.root.traverse(&mut components)
+	}
+}
+
+#[derive(Debug)]
+struct DirTreeNode {
+	children: HashMap<OsString, DirTreeNode>,
+}
+
+impl DirTreeNode {
+	fn new() -> Self {
+		Self {
+			children: HashMap::new(),
+		}
+	}
+
+	fn insert(&mut self, components: &mut Components) {
+		let Some(component) = components.next() else {
+			return;
+		};
+
+		let component = component.as_os_str().to_os_string();
+		let next = self
+			.children
+			.entry(component)
+			.or_insert_with(DirTreeNode::new);
+
+		next.insert(components);
+	}
+
+	fn traverse(&self, components: &mut Components) -> Option<&Self> {
+		let Some(component) = components.next() else {
+			return Some(self);
+		};
+
+		let component = component.as_os_str();
+		let next = self.children.get(component)?;
+
+		next.traverse(components)
+	}
 }
 
 #[derive(Debug, Error)]
