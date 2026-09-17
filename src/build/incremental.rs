@@ -51,7 +51,7 @@ pub fn incremental_build(
 			)
 		})?);
 		hasher.update(
-			&to_stdvec(&get_mtime_size(&file.file).change_context_lazy(error)?)
+			&to_stdvec(&get_mtime_size(&module_dir.join(&file.file)).change_context_lazy(error)?)
 				.change_context_lazy(error)
 				.attach_with(|| {
 					format!(
@@ -63,7 +63,7 @@ pub fn incremental_build(
 	}
 	let hash = hasher.finalize();
 
-	todo!();
+	// TODO!
 
 	*successful_units += 1;
 

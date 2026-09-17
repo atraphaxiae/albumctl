@@ -98,7 +98,7 @@ fn recurse_modules(
 		.collect::<Metadata>();
 	let tracklist = module.discs.as_deref().or(parent_tracklist);
 
-	match &module.children {
+	match module.children {
 		Children::Modules { modules } => {
 			*successful_modules += 1;
 			for child_dir in modules {
@@ -120,19 +120,36 @@ fn recurse_modules(
 			}
 		}
 
-		Children::Files { files } => {
+		Children::Files { mut files } => {
 			let Some(tracklist) = tracklist else {
 				return Err(error()).attach(
 					"a tracklist is required to be defined in at least one module in this lineage for this unit to be built",
 				);
 			};
 
+			files.sort_by_key(|file| (file.disc_number, file.track_number));
+			let expected = tracklist
+				.iter()
+				.enumerate()
+				.flat_map(|(disc_number, disc)| {
+					disc.tracks
+						.iter()
+						.enumerate()
+						.map(move |(track_number, _)| (disc_number + 1, track_number + 1))
+				});
+			let actual = files
+				.iter()
+				.map(|file| (file.disc_number, file.track_number));
+			if actual.ne(expected) {
+				return Err(error()).attach("source file mapping doesn't match the tracklist");
+			}
+
 			*successful_modules += 1;
 			if let Err(e) = incremental_build(
 				module_dir,
 				&metadata,
 				tracklist,
-				files,
+				&files,
 				previous_index,
 				current_index,
 				index_file,
