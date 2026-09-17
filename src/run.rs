@@ -12,6 +12,8 @@ use crate::{
 };
 
 pub fn run() -> Result<(), RunError> {
+	println!();
+
 	let args = Cli::parse();
 
 	match args.command {
