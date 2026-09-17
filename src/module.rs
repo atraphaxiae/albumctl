@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{
+	collections::BTreeMap,
+	path::{Path, PathBuf},
+};
 
 #[derive(Debug, Deserialize)]
 pub struct RootModule {
@@ -48,4 +51,14 @@ pub struct File {
 	pub file: PathBuf,
 	pub disc_number: usize,
 	pub track_number: usize,
+}
+
+impl File {
+	pub fn with_new_file(&self, file: &Path) -> Self {
+		Self {
+			file: file.to_path_buf(),
+			disc_number: self.disc_number,
+			track_number: self.track_number,
+		}
+	}
 }
