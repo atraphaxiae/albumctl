@@ -72,18 +72,22 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 		eprintln!("{e:?}\n");
 	}
 
-	println!("Building source directory {dir:?} completed.");
-	println!("Output: {:?}", root_module.output_directory);
-	println!("{successful_modules}/{total_modules} discovered modules loaded successfully.");
+	println!("Build completed.");
+	println!("├╴Source: {}", dir.display());
+	println!("├╴Output: {}", root_module.output_directory.display());
+	println!("│");
+	println!("├╴Modules: {}/{} loaded", successful_modules, total_modules);
 	println!(
-		"{} built, {} skipped, {} failed, out of {} discovered units.",
-		built_units,
+		"├╴Units:   {} skipped, {} build, {} failed",
 		skipped_units,
-		total_units - (built_units + skipped_units),
-		total_units,
+		built_units,
+		total_units - (skipped_units + built_units)
 	);
+
 	if let Ok(deleted_items) = clean_result {
-		println!("{deleted_items} stale items deleted from output directory.")
+		println!("╰╴Cleanup: {} stale items deleted", deleted_items);
+	} else {
+		println!("╰╴Cleanup: failed");
 	}
 
 	Ok(())

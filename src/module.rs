@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use serde::{Deserialize, Serialize};
-use std::{
-	collections::BTreeMap,
-	path::PathBuf,
-};
+use std::{collections::BTreeMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
 pub struct RootModule {
