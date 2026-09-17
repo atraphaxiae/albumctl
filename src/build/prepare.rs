@@ -97,10 +97,10 @@ fn recurse_modules(
 		.map(|(key, value)| (key.clone(), value.clone()))
 		.collect::<Metadata>();
 	let tracklist = module.discs.as_deref().or(parent_tracklist);
-	*successful_modules += 1;
 
 	match &module.children {
 		Children::Modules { modules } => {
+			*successful_modules += 1;
 			for child_dir in modules {
 				let child_dir = module_dir.join(child_dir);
 				if let Err(e) = recurse_modules(
@@ -127,6 +127,7 @@ fn recurse_modules(
 				);
 			};
 
+			*successful_modules += 1;
 			if let Err(e) = incremental_build(
 				module_dir,
 				&metadata,
