@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 use std::{
 	collections::BTreeMap,
-	path::{Path, PathBuf},
+	path::PathBuf,
 };
 
 #[derive(Debug, Deserialize)]

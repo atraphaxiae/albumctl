@@ -73,7 +73,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	}
 
 	println!("Building source directory {dir:?} completed.");
-	println!("Output: {:?}", &root_module.output_directory);
+	println!("Output: {:?}", root_module.output_directory);
 	println!("{successful_modules}/{total_modules} discovered modules loaded successfully.");
 	println!(
 		"{} built, {} skipped, {} failed, out of {} discovered units.",
