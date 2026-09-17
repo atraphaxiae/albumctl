@@ -5,12 +5,35 @@ use std::{
 	fs::{OpenOptions, create_dir_all},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
+	time::SystemTime,
 };
 
 use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::result::Result;
+
+pub fn get_mtime_size(path: &Path) -> Result<(SystemTime, u64), FilesystemError> {
+	let error = || FilesystemError::GetMtimeSize {
+		path: path.to_path_buf(),
+	};
+
+	match path.metadata() {
+		Ok(metadata) => Ok((
+			metadata
+				.modified()
+				.change_context_lazy(error)
+				.attach_with(|| format!("while getting mtime of {path:?}"))?,
+			metadata.len(),
+		)),
+		Err(e) if e.kind() == ErrorKind::NotFound => {
+			Err(error()).attach(format!("{path:?} does not exist"))
+		}
+		Err(e) => Err(e)
+			.change_context(error())
+			.attach(format!("while reading metadata of {path:?}")),
+	}
+}
 
 pub fn require_file(file: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::RequireFile {
@@ -63,6 +86,9 @@ pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
+	#[error("Could not get mtime and size of {path:?}")]
+	GetMtimeSize { path: PathBuf },
+
 	#[error("Expected a file at {file:?}")]
 	RequireFile { file: PathBuf },
 
