@@ -18,7 +18,7 @@ use crate::{
 	result::Result,
 };
 
-pub type BuildIndex = HashMap<String, PathBuf>;
+pub type BuildIndex = HashMap<String, Vec<PathBuf>>;
 
 pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	let error = || PrepareBuildError::Build {
@@ -193,13 +193,13 @@ impl FsTree {
 		}
 	}
 
-	fn insert(&mut self, dir: &Path) {
-		let mut components = dir.components();
+	fn insert(&mut self, path: &Path) {
+		let mut components = path.components();
 		self.root.insert(&mut components);
 	}
 
-	fn traverse(&self, dir: &Path) -> Option<&FsTreeNode> {
-		let mut components = dir.components();
+	fn traverse(&self, path: &Path) -> Option<&FsTreeNode> {
+		let mut components = path.components();
 		self.root.traverse(&mut components)
 	}
 }

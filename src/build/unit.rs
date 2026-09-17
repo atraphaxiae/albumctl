@@ -20,7 +20,7 @@ pub fn build_unit(
 	tracklist: &[Disc],
 	files: &[File],
 	output_dir: &Path,
-) -> Result<PathBuf, UnitBuildError> {
+) -> Result<Vec<PathBuf>, UnitBuildError> {
 	let error = || UnitBuildError {
 		dir: unit_dir.to_path_buf(),
 	};
@@ -75,13 +75,18 @@ pub fn build_unit(
 	));
 	ensure_dir(&unit_output_dir).change_context_lazy(error)?;
 
-	for file in new_files {
+	for file in &new_files {
 		let from = unit_build_dir.join(&file.file);
 		let to = unit_output_dir.join(&file.file);
 		move_file(&from, &to).change_context_lazy(error)?;
 	}
 
-	Ok(unit_output_dir)
+	let unit_output_files = new_files
+		.into_iter()
+		.map(|file| unit_output_dir.join(&file.file))
+		.collect::<Vec<_>>();
+
+	Ok(unit_output_files)
 }
 
 fn get_track_field<'a>(

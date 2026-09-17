@@ -66,14 +66,15 @@ pub fn incremental_build(
 	}
 	let hash = hasher.finalize();
 
-	if let Some(unit_output_dir) = previous_index.get(&hash.to_string()) {
-		current_index.insert(hash.to_string(), unit_output_dir.clone());
+	if let Some(unit_output_files) = previous_index.get(&hash.to_string()) {
+		current_index.insert(hash.to_string(), unit_output_files.clone());
 		save_manifest(index_file, current_index).change_context_lazy(error)?;
 		*skipped_units += 1;
 	} else {
-		let unit_output_dir = build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
-			.change_context_lazy(error)?;
-		current_index.insert(hash.to_string(), unit_output_dir);
+		let unit_output_files =
+			build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
+				.change_context_lazy(error)?;
+		current_index.insert(hash.to_string(), unit_output_files);
 		save_manifest(index_file, current_index).change_context_lazy(error)?;
 		*built_units += 1;
 	}
