@@ -39,9 +39,11 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	let mut current_index = BuildIndex::new();
 
 	let mut total_modules = 0_usize;
-	let mut total_units = 0_usize;
 	let mut successful_modules = 0_usize;
-	let mut successful_units = 0_usize;
+
+	let mut total_units = 0_usize;
+	let mut built_units = 0_usize;
+	let mut skipped_units = 0_usize;
 
 	for child_dir in root_module.children.modules {
 		let child_dir = dir.join(child_dir);
@@ -54,17 +56,25 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 			&index_file,
 			&root_module.output_directory,
 			&mut total_modules,
-			&mut total_units,
 			&mut successful_modules,
-			&mut successful_units,
+			&mut total_units,
+			&mut built_units,
+			&mut skipped_units,
 		) {
 			eprintln!("{e:?}");
 		}
 	}
 
 	println!("Building source directory {dir:?} completed.");
+	println!("Output: {:?}", &root_module.output_directory);
 	println!("{successful_modules}/{total_modules} discovered modules loaded successfully.");
-	println!("{successful_units}/{total_units} discovered units built successfully.");
+	println!(
+		"{} built, {} skipped, {} failed, out of {} discovered units",
+		built_units,
+		skipped_units,
+		total_units - (built_units + skipped_units),
+		total_units,
+	);
 
 	Ok(())
 }
@@ -82,9 +92,10 @@ fn recurse_modules(
 	index_file: &Path,
 	output_dir: &Path,
 	total_modules: &mut usize,
-	total_units: &mut usize,
 	successful_modules: &mut usize,
-	successful_units: &mut usize,
+	total_units: &mut usize,
+	built_units: &mut usize,
+	skipped_units: &mut usize,
 ) -> Result<(), LoadModuleError> {
 	let error = || LoadModuleError {
 		dir: module_dir.to_path_buf(),
@@ -114,9 +125,10 @@ fn recurse_modules(
 					index_file,
 					output_dir,
 					total_modules,
-					total_units,
 					successful_modules,
-					successful_units,
+					total_units,
+					built_units,
+					skipped_units,
 				) {
 					eprintln!("{e:?}");
 				}
@@ -158,7 +170,8 @@ fn recurse_modules(
 				index_file,
 				output_dir,
 				total_units,
-				successful_units,
+				built_units,
+				skipped_units,
 			) {
 				eprintln!("{e:?}");
 			};

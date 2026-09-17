@@ -26,7 +26,8 @@ pub fn incremental_build(
 	index_file: &Path,
 	output_dir: &Path,
 	total_units: &mut usize,
-	successful_units: &mut usize,
+	built_units: &mut usize,
+	skipped_units: &mut usize,
 ) -> Result<(), IncrementalBuildError> {
 	let error = || IncrementalBuildError {
 		dir: module_dir.to_path_buf(),
@@ -65,15 +66,18 @@ pub fn incremental_build(
 	}
 	let hash = hasher.finalize();
 
-	let unit_output_dir = match previous_index.get(&hash.to_string()) {
-		Some(dir) => dir.clone(),
-		None => build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
-			.change_context_lazy(error)?,
-	};
-	current_index.insert(hash.to_string(), unit_output_dir);
-	save_manifest(index_file, current_index).change_context_lazy(error)?;
+	if let Some(unit_output_dir) = previous_index.get(&hash.to_string()) {
+		current_index.insert(hash.to_string(), unit_output_dir.clone());
+		save_manifest(index_file, current_index).change_context_lazy(error)?;
+		*skipped_units += 1;
+	} else {
+		let unit_output_dir = build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
+			.change_context_lazy(error)?;
+		current_index.insert(hash.to_string(), unit_output_dir);
+		save_manifest(index_file, current_index).change_context_lazy(error)?;
+		*built_units += 1;
+	}
 
-	*successful_units += 1;
 	Ok(())
 }
 
