@@ -13,6 +13,5 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
-	Check { dir: PathBuf },
 	Build { dir: PathBuf },
 }

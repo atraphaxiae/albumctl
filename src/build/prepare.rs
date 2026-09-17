@@ -89,10 +89,6 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	Ok(())
 }
 
-pub fn check(dir: &Path) -> Result<(), PrepareBuildError> {
-	todo!()
-}
-
 fn recurse_modules(
 	module_dir: &Path,
 	parent_metadata: &Metadata,
@@ -358,7 +354,4 @@ pub enum CleanOutputDirError {
 pub enum PrepareBuildError {
 	#[error("Failed to build source directory {dir:?}")]
 	Build { dir: PathBuf },
-
-	#[error("Failed to check source directory {dir:?}")]
-	Check { dir: PathBuf },
 }
