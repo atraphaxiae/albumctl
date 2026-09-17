@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use std::{
-	fs::{self, OpenOptions, copy, create_dir_all},
+	fs::{self, OpenOptions, copy, create_dir_all, rename},
 	io::{ErrorKind, Write},
 	path::{Path, PathBuf},
 	time::SystemTime,
@@ -97,6 +97,19 @@ pub fn copy_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 	Ok(())
 }
 
+pub fn move_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
+	let error = || FilesystemError::MoveFile {
+		from: from.to_path_buf(),
+		to: to.to_path_buf(),
+	};
+
+	rename(from, to)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while moving file from {from:?} to {to:?}"))?;
+
+	Ok(())
+}
+
 #[derive(Debug, Error)]
 pub enum FilesystemError {
 	#[error("Could not get mtime and size of {path:?}")]
@@ -113,4 +126,7 @@ pub enum FilesystemError {
 
 	#[error("Could not copy file from {from:?} to {to:?}")]
 	CopyFile { from: PathBuf, to: PathBuf },
+
+	#[error("Could not move file from {from:?} to {to:?}")]
+	MoveFile { from: PathBuf, to: PathBuf },
 }
