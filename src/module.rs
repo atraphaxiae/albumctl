@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
@@ -25,13 +25,13 @@ pub struct Module {
 
 pub type Metadata = HashMap<String, String>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Disc {
 	pub metadata: Metadata,
 	pub tracks: Vec<Track>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Track {
 	pub metadata: Metadata,
 }
@@ -45,7 +45,7 @@ pub enum Children {
 
 #[derive(Debug, Deserialize)]
 pub struct File {
-	file: PathBuf,
-	disc_number: usize,
-	track_number: usize,
+	pub file: PathBuf,
+	pub disc_number: usize,
+	pub track_number: usize,
 }
