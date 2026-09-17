@@ -4,6 +4,8 @@
 use std::{
 	collections::HashMap,
 	ffi::OsString,
+	fs::{DirEntry, read_dir},
+	io,
 	path::{Components, Path, PathBuf},
 };
 
@@ -12,7 +14,7 @@ use thiserror::Error;
 
 use crate::{
 	build::incremental::incremental_build,
-	filesystem::{ensure_dir, ensure_file},
+	filesystem::{delete, ensure_dir, ensure_file, get_file_type},
 	manifest::load_manifest,
 	module::{Children, Disc, Metadata, Module, RootModule},
 	result::Result,
@@ -65,6 +67,11 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 		}
 	}
 
+	let clean_result = clean_output_dir(&current_index, &root_module.output_directory);
+	if let Err(e) = &clean_result {
+		eprintln!("{e:?}");
+	}
+
 	println!("Building source directory {dir:?} completed.");
 	println!("Output: {:?}", &root_module.output_directory);
 	println!("{successful_modules}/{total_modules} discovered modules loaded successfully.");
@@ -75,6 +82,9 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 		total_units - (built_units + skipped_units),
 		total_units,
 	);
+	if let Ok(deleted_items) = clean_result {
+		println!("{deleted_items} stale items deleted from output directory.")
+	}
 
 	Ok(())
 }
@@ -181,6 +191,93 @@ fn recurse_modules(
 	Ok(())
 }
 
+fn clean_output_dir(
+	current_index: &BuildIndex,
+	output_dir: &Path,
+) -> Result<usize, CleanOutputDirError> {
+	let error = || CleanOutputDirError::Prepare {
+		dir: output_dir.to_path_buf(),
+	};
+
+	let mut fs_tree = FsTree::new();
+	for files in current_index.values() {
+		for file in files {
+			fs_tree.insert(file);
+		}
+	}
+
+	let output_fs_tree = fs_tree.traverse(output_dir).ok_or_else(error)?;
+	let mut stack = vec![(output_dir.to_path_buf(), output_fs_tree)];
+	let mut deleted_items = 0;
+
+	while let Some((dir, node)) = stack.pop() {
+		if let Err(e) = clean_dir(&dir, node, &mut stack, &mut deleted_items, output_dir) {
+			eprintln!("{e:?}");
+		}
+	}
+
+	Ok(deleted_items)
+}
+
+fn clean_dir<'a>(
+	dir: &Path,
+	node: &'a FsTreeNode,
+	stack: &mut Vec<(PathBuf, &'a FsTreeNode)>,
+	deleted_items: &mut usize,
+	output_dir: &Path,
+) -> Result<(), CleanOutputDirError> {
+	let error = || CleanOutputDirError::CleanDir {
+		dir: dir.to_path_buf(),
+	};
+
+	for entry in read_dir(dir)
+		.change_context_lazy(error)
+		.attach_with(|| format!("while reading {dir:?}"))?
+	{
+		if let Err(e) = clean_entries(entry, dir, node, stack, deleted_items, output_dir) {
+			eprintln!("{e:?}");
+		}
+	}
+
+	Ok(())
+}
+
+fn clean_entries<'a>(
+	entry: std::result::Result<DirEntry, io::Error>,
+	dir: &Path,
+	node: &'a FsTreeNode,
+	stack: &mut Vec<(PathBuf, &'a FsTreeNode)>,
+	deleted_items: &mut usize,
+	output_dir: &Path,
+) -> Result<(), CleanOutputDirError> {
+	let error = || CleanOutputDirError::CleanDir {
+		dir: dir.to_path_buf(),
+	};
+
+	let entry = entry
+		.change_context_lazy(error)
+		.attach_with(|| format!("while reading entries of {dir:?}"))?;
+
+	let path = entry.path();
+
+	if dir == output_dir && entry.file_name() == ".albumctl" {
+		return Ok(());
+	}
+
+	if let Some(child) = node.children.get(&entry.file_name()) {
+		if get_file_type(&path).change_context_lazy(error)?.is_dir() {
+			stack.push((path, child));
+		}
+	} else {
+		delete(&path)
+			.change_context_lazy(error)
+			.attach_with(|| format!("while deleting {path:?}"))?;
+		*deleted_items += 1;
+	}
+
+	Ok(())
+}
+
 #[derive(Debug)]
 struct FsTree {
 	root: FsTreeNode,
@@ -246,6 +343,15 @@ impl FsTreeNode {
 #[error("Could not load module {dir:?}")]
 pub struct LoadModuleError {
 	dir: PathBuf,
+}
+
+#[derive(Debug, Error)]
+pub enum CleanOutputDirError {
+	#[error("Could not prepare to clean output directory {dir:?}")]
+	Prepare { dir: PathBuf },
+
+	#[error("Could not clean directory {dir:?}")]
+	CleanDir { dir: PathBuf },
 }
 
 #[derive(Debug, Error)]
