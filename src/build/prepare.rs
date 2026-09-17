@@ -17,7 +17,7 @@ use crate::{
 	build::incremental::incremental_build,
 	filesystem::{delete, ensure_dir, ensure_file, get_file_type},
 	manifest::load_manifest,
-	module::{Children, Disc, Metadata, Module, RootModule},
+	module::{Children, Disc, File, Metadata, Module, RootModule},
 	result::Result,
 };
 
@@ -163,6 +163,21 @@ fn recurse_modules(
 			};
 
 			files.sort_by_key(|file| (file.disc_number, file.track_number));
+
+			let mut files_map = HashMap::<&Path, &File>::new();
+			for file in &files {
+				if let Some(duplicate) = files_map.insert(&file.file, &file) {
+					return Err(error()).attach(format!(
+						"Tracks {}.{:02} and {}.{:02} are mapped to the same source file {:?}",
+						duplicate.disc_number,
+						duplicate.track_number,
+						file.disc_number,
+						file.track_number,
+						file.file
+					));
+				}
+			}
+
 			let expected = tracklist
 				.iter()
 				.enumerate()

@@ -10,7 +10,7 @@ use thiserror::Error;
 
 use crate::{
 	build::{prepare::BuildIndex, unit::build_unit},
-	filesystem::{get_mtime_size, require_file},
+	filesystem::get_mtime_size,
 	manifest::save_manifest,
 	module::{Disc, File, Metadata},
 	result::Result,
