@@ -94,7 +94,7 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	if let Ok(deleted_items) = clean_result {
 		println!(
 			"╰╴Cleanup: {}",
-			format!("{} stale items deleted", deleted_items).green()
+			format!("{} unmanaged items deleted", deleted_items).green()
 		);
 	} else {
 		println!("╰╴Cleanup: {}", "failed".red());
