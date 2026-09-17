@@ -8,7 +8,7 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::{
-	filesystem::{copy_file, ensure_dir, move_file},
+	filesystem::{copy_file, delete, ensure_dir, move_file},
 	module::{Disc, File, Metadata},
 	result::Result,
 };
@@ -56,6 +56,7 @@ pub fn build_unit(
 		.change_context_lazy(error)?;
 
 	let unit_build_dir = output_dir.join(format!(".albumctl/{}", hash));
+	delete(&unit_build_dir).change_context_lazy(error)?;
 	ensure_dir(&unit_build_dir).change_context_lazy(error)?;
 
 	for file in files {
@@ -86,6 +87,7 @@ pub fn build_unit(
 		.map(|file| unit_output_dir.join(&file.file))
 		.collect::<Vec<_>>();
 
+	delete(&unit_build_dir).change_context_lazy(error)?;
 	Ok(unit_output_files)
 }
 
