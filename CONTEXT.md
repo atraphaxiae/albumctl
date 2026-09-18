@@ -47,20 +47,22 @@ For v0.3.0, basically we have:
 ## Per-Unit Build Process
 Time to get to the annoying bits, because this part uses a lot of filesystem ops. Fun!
 
-1. We should have the unit hash at this point. First we mkdir `.albumctl/{hash}`. This will be our
-	per-unit build directory. If it already exists, we recreate it. This is to discard previously
-	failed unit builds.
-2. We COPY (not move, for obvious reasons) the `files` into the build directory.
-3. We do the processing into a consistent format here. No processing yet except for renaming; the
-	cutting/SACD ripping will be implemented in v0.4.0. The filenames should be:
-	`{disc}.{track:02} {title}.{original_extension}`. The extension isn't important.
-4. If conversion is specified, use ffmpeg. For v0.3.0, we unconditionally convert without checking
-	if the files are already the correct format. This creates copies; the filenames should be
-	`{disc}.{track:02} {title}.{original_extension}.{target_extension}`. The original copied files
-	are deleted, then the new files are renamed to remove the `.{extension}` part.
-5. If replaygain is specified, use rsgain. This is an in-place operation, so no special handling
-	required.
-6. Finally, we move the processed files into the appropriate directory in the output directory.
-	For now, this will be `{artist} - ({year}) {album}/({release_year}) {catalog_number} [{media_type}, {audio_channels}, {provenance}]`.
-	Templates that will allow to modify this will be implemented in v0.5.0.
-7. Done!
+1. Get the metadata that we need. We need artist, year, album, release year, catalog number, media
+	type, audio channels, and provenance.
+2. Delete and regenerate the unit build dir `.albumctl/{hash}`.
+3. Create the unit output dir
+	`{artist} - ({year}) {album}/({release_year}) {catalog_number} [{media_type}, {audio_channels}, {provenance}]`.
+	Then the following steps are to be done for each file:
+4. Get the title field of the track that the file maps to. Generate the consistent filename
+	`{disc_number}.{track_number:02} {title}`
+5. Copy the source audio file to the unit build dir.
+4. Rename the copied file using the consistent filename, retaining its original extension.
+6. If conversion is specified, use ffmpeg. The output filename should be the renamed filename plus
+	the target extension.
+7. Delete the copied file, then rename the output file using the consistent filename plus the target
+	extension.
+8. If replaygain is specified, use rsgain. This is an in-place operation so no special handling
+	needed.
+9. Move the file to the unit output dir
+10. Go back to (4) for the next file
+11. Done!
