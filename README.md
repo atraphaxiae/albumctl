@@ -35,7 +35,7 @@ the directory specified in `albumctl.toml`. If you ever lose this music library,
 run the build again.
 
 ## Installation
-Install the latest release from [crates.io](https://crates.io/crates/albumctl):
+Install the latest release from [`crates.io`](https://crates.io/crates/albumctl):
 
 ```sh
 cargo install albumctl
