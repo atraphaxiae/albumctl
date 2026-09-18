@@ -50,7 +50,9 @@ pub fn build_unit(
 	));
 	ensure_dir(&unit_output_dir).change_context_lazy(error)?;
 
+	let mut unit_build_files = Vec::new();
 	let mut unit_output_files = Vec::new();
+
 	for File {
 		file: original_file,
 		disc_number,
@@ -72,7 +74,7 @@ pub fn build_unit(
 		copy_file(&original_file_full, &copied_file_full).change_context_lazy(error)?;
 		move_file(&copied_file_full, &build_file_full).change_context_lazy(error)?;
 
-		// Processing here. In this order: conversion -> tagging -> replaygain
+		// Processing here. Conversion first then tagging
 		if let Some(Conversion {
 			ffmpeg_command,
 			target_format,
@@ -121,58 +123,64 @@ pub fn build_unit(
 			output_file_full = unit_output_dir.join(renamed_file);
 		}
 
-		if let Some(Replaygain {
-			rsgain_command,
-			album_gain,
-			target_lufs,
-			clip_mode,
-		}) = replaygain
-		{
-			// rsgain custom -s i [--album] -l <LUFS> -c <CLIPMODE>
-			let mut command = Command::new(rsgain_command);
+		unit_build_files.push(build_file_full);
+		unit_output_files.push(output_file_full);
+	}
 
-			command.arg("custom");
+	// This is outside the per-file loop because rsgain needs to have a list of all files in the
+	// album for album gain to work
+	if let Some(Replaygain {
+		rsgain_command,
+		album_gain,
+		target_lufs,
+		clip_mode,
+	}) = replaygain
+	{
+		// rsgain custom -s i [--album] -l <LUFS> -c <CLIPMODE> <FILES...>
+		let mut command = Command::new(rsgain_command);
 
-			command.arg("-s");
-			command.arg("i");
+		command.arg("custom");
 
-			if *album_gain {
-				command.arg("-a");
+		command.arg("-s");
+		command.arg("i");
 
-			}
-
-			command.arg("-l");
-			command.arg(target_lufs.to_string());
-
-			command.arg("-c");
-			match clip_mode {
-				ClipMode::Disabled => command.arg("n"),
-				ClipMode::PositiveGain => command.arg("p"),
-				ClipMode::AlwaysEnabled => command.arg("a"),
-			};
-
-			command.arg(&build_file_full);
-
-			let result = command
-				.output()
-				.change_context_lazy(|| ReplaygainError::Execute {
-					disc_number: *disc_number,
-					track_number: *track_number,
-				})
-				.change_context_lazy(error)?;
-
-			if !result.status.success() {
-				return Err(ReplaygainError::Rsgain {
-					disc_number: *disc_number,
-					track_number: *track_number,
-					stderr: String::from_utf8_lossy(&result.stderr).to_string(),
-				})
-				.change_context_lazy(error);
-			}
+		if *album_gain {
+			command.arg("-a");
 		}
 
+		command.arg("-l");
+		command.arg(target_lufs.to_string());
+
+		command.arg("-c");
+		match clip_mode {
+			ClipMode::Disabled => command.arg("n"),
+			ClipMode::PositiveGain => command.arg("p"),
+			ClipMode::AlwaysEnabled => command.arg("a"),
+		};
+
+		for build_file_full in &unit_build_files {
+			command.arg(build_file_full);
+		}
+
+		let result = command
+			.output()
+			.change_context_lazy(|| ReplaygainError::Execute {
+				dir: unit_dir.to_path_buf(),
+			})
+			.change_context_lazy(error)?;
+
+		if !result.status.success() {
+			return Err(ReplaygainError::Rsgain {
+				dir: unit_dir.to_path_buf(),
+				stderr: String::from_utf8_lossy(&result.stderr).to_string(),
+			})
+			.change_context_lazy(error);
+		}
+	}
+
+	for (build_file_full, output_file_full) in unit_build_files.iter().zip(unit_output_files.iter())
+	{
 		move_file(&build_file_full, &output_file_full).change_context_lazy(error)?;
-		unit_output_files.push(output_file_full);
 	}
 
 	Ok(unit_output_files)
@@ -242,20 +250,11 @@ pub enum ConvertError {
 
 #[derive(Debug, Error)]
 pub enum ReplaygainError {
-	#[error("Could not execute replaygain tagging for track {disc_number}.{track_number:02}")]
-	Execute {
-		disc_number: usize,
-		track_number: usize,
-	},
+	#[error("Could not execute replaygain tagging for unit {dir:?}")]
+	Execute { dir: PathBuf },
 
-	#[error(
-		"rsgain replaygain tagging failed for track {disc_number}.{track_number:02}:\n{stderr}"
-	)]
-	Rsgain {
-		disc_number: usize,
-		track_number: usize,
-		stderr: String,
-	},
+	#[error("rsgain replaygain tagging failed for unit {dir:?}:\n{stderr}")]
+	Rsgain { dir: PathBuf, stderr: String },
 }
 
 #[derive(Debug, Error)]
