@@ -88,6 +88,7 @@ pub fn build_unit(
 				PathBuf::from(&consistent_filename).with_added_extension(target_format);
 			let renamed_file_full = unit_build_dir.join(&renamed_file);
 
+			// ffmpeg -i <FILE> -ar <SAMPLE_RATE> -sample_fmt <SAMPLE_FORMAT> <OUTPUT>
 			let result = Command::new(ffmpeg_command)
 				.arg("-i")
 				.arg(&build_file_full)
@@ -128,10 +129,17 @@ pub fn build_unit(
 			clip_mode,
 		}) = replaygain
 		{
+			// rsgain custom -l <LUFS> [--album] -c <CLIPMODE>
 			let mut command = Command::new(rsgain_command);
-			command.args(["-l", &target_lufs.to_string()]);
+
+			command.arg("custom");
+
+			command.arg("-l");
+			command.arg(target_lufs.to_string());
+
 			if *album_gain {
 				command.arg("-a");
+
 			}
 			command.arg("-c");
 			match clip_mode {
@@ -139,6 +147,7 @@ pub fn build_unit(
 				ClipMode::PositiveGain => command.arg("p"),
 				ClipMode::AlwaysEnabled => command.arg("a"),
 			};
+
 			command.arg(&build_file_full);
 
 			let result = command
