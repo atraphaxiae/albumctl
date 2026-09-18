@@ -173,6 +173,10 @@ Right now, `albumctl` outputs your music directory using an `Output -> Album -> 
 In the future this will be customizable, along with which metadata to use for generating file and
 folder names.
 
+A more comprehensive example of how to use `albumctl` can be found in
+my [`music-library`](https://github.com/atraphaxiae/music-library) repository, which I use to
+generate my own music library.
+
 ## Documentation
 The comprehensive documentation of `albumctl` is found at
 [`https://atraphaxiae.github.io/albumctl/`](https://atraphaxiae.github.io/albumctl/).
