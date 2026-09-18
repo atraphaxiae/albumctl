@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) Nile Jocson <atraphaxiae@gmail.com>
 // SPDX-License-Identifier: MPL-2.0
 
-use std::path::{Path, PathBuf};
+use std::{
+	path::{Path, PathBuf},
+	process::Command,
+};
 
 use blake3::Hash;
 use error_stack::ResultExt;
@@ -9,7 +12,7 @@ use thiserror::Error;
 
 use crate::{
 	filesystem::{copy_file, delete, ensure_dir, move_file},
-	module::{Disc, File, Metadata},
+	module::{ClipMode, Conversion, Disc, File, Metadata, Replaygain},
 	result::Result,
 };
 
@@ -19,6 +22,8 @@ pub fn build_unit(
 	metadata: &Metadata,
 	tracklist: &[Disc],
 	files: &[File],
+	conversion: Option<&Conversion>,
+	replaygain: Option<&Replaygain>,
 	output_dir: &Path,
 ) -> Result<Vec<PathBuf>, UnitBuildError> {
 	let error = || UnitBuildError {
@@ -59,17 +64,102 @@ pub fn build_unit(
 
 		let original_file_full = unit_dir.join(&original_file);
 		let copied_file_full = unit_build_dir.join(&original_file);
-		let build_file_full = unit_build_dir
-			.join(&consistent_filename)
+
+		let mut build_file = PathBuf::from(&consistent_filename)
 			.with_added_extension(copied_file_full.extension().unwrap_or_default());
-		let output_file_full = unit_output_dir
-			.join(&consistent_filename)
-			.with_added_extension(copied_file_full.extension().unwrap_or_default());
+		let mut build_file_full = unit_build_dir.join(&build_file);
+		let mut output_file_full = unit_output_dir.join(&build_file);
 
 		copy_file(&original_file_full, &copied_file_full).change_context_lazy(error)?;
 		move_file(&copied_file_full, &build_file_full).change_context_lazy(error)?;
-		move_file(&build_file_full, &output_file_full).change_context_lazy(error)?;
 
+		// Processing here. In this order: conversion -> tagging -> replaygain
+		if let Some(Conversion {
+			ffmpeg_command,
+			target_format,
+			sample_rate,
+			sample_format,
+		}) = conversion
+		{
+			// Basically we want, for example, music.dsf -> music.dsf.flac -> music.flac
+			let converted_file_full = build_file_full.with_added_extension(target_format);
+
+			let renamed_file =
+				PathBuf::from(&consistent_filename).with_added_extension(target_format);
+			let renamed_file_full = unit_build_dir.join(&renamed_file);
+
+			let result = Command::new(ffmpeg_command)
+				.arg("-i")
+				.arg(&build_file_full)
+				.arg("-ar")
+				.arg(sample_rate.to_string())
+				.arg("-sample_fmt")
+				.arg(sample_format)
+				.arg(&converted_file_full)
+				.output()
+				.change_context_lazy(|| ConvertError::Execute {
+					disc_number: *disc_number,
+					track_number: *track_number,
+				})
+				.change_context_lazy(error)?;
+
+			if !result.status.success() {
+				return Err(ConvertError::Ffmpeg {
+					disc_number: *disc_number,
+					track_number: *track_number,
+					stderr: String::from_utf8_lossy(&result.stderr).to_string(),
+				})
+				.change_context_lazy(error);
+			}
+
+			delete(&build_file_full).change_context_lazy(error)?;
+			move_file(&converted_file_full, &renamed_file_full).change_context_lazy(error)?;
+
+			// Because the extension changed, we need to change the path of the build file
+			build_file = renamed_file.clone();
+			build_file_full = renamed_file_full;
+			output_file_full = unit_output_dir.join(renamed_file);
+		}
+
+		if let Some(Replaygain {
+			rsgain_command,
+			album_gain,
+			target_lufs,
+			clip_mode,
+		}) = replaygain
+		{
+			let mut command = Command::new(rsgain_command);
+			command.args(["-l", &target_lufs.to_string()]);
+			if *album_gain {
+				command.arg("-a");
+			}
+			command.arg("-c");
+			match clip_mode {
+				ClipMode::Disabled => command.arg("n"),
+				ClipMode::PositiveGain => command.arg("p"),
+				ClipMode::AlwaysEnabled => command.arg("a"),
+			};
+			command.arg(&build_file_full);
+
+			let result = command
+				.output()
+				.change_context_lazy(|| ReplaygainError::Execute {
+					disc_number: *disc_number,
+					track_number: *track_number,
+				})
+				.change_context_lazy(error)?;
+
+			if !result.status.success() {
+				return Err(ReplaygainError::Rsgain {
+					disc_number: *disc_number,
+					track_number: *track_number,
+					stderr: String::from_utf8_lossy(&result.stderr).to_string(),
+				})
+				.change_context_lazy(error);
+			}
+		}
+
+		move_file(&build_file_full, &output_file_full).change_context_lazy(error)?;
 		unit_output_files.push(output_file_full);
 	}
 
@@ -121,6 +211,40 @@ pub enum MetadataError {
 
 	#[error("Unit {dir:?} is missing field '{field}'")]
 	UnitFieldMissing { dir: PathBuf, field: String },
+}
+
+#[derive(Debug, Error)]
+pub enum ConvertError {
+	#[error("Could not execute conversion for track {disc_number}.{track_number:02}")]
+	Execute {
+		disc_number: usize,
+		track_number: usize,
+	},
+
+	#[error("ffmpeg conversion failed for track {disc_number}.{track_number:02}:\n{stderr}")]
+	Ffmpeg {
+		disc_number: usize,
+		track_number: usize,
+		stderr: String,
+	},
+}
+
+#[derive(Debug, Error)]
+pub enum ReplaygainError {
+	#[error("Could not execute replaygain tagging for track {disc_number}.{track_number:02}")]
+	Execute {
+		disc_number: usize,
+		track_number: usize,
+	},
+
+	#[error(
+		"rsgain replaygain tagging failed for track {disc_number}.{track_number:02}:\n{stderr}"
+	)]
+	Rsgain {
+		disc_number: usize,
+		track_number: usize,
+		stderr: String,
+	},
 }
 
 #[derive(Debug, Error)]

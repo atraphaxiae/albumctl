@@ -12,7 +12,7 @@ use crate::{
 	build::{prepare::BuildIndex, unit::build_unit},
 	filesystem::get_mtime_size,
 	manifest::save_manifest,
-	module::{Disc, File, Metadata},
+	module::{Conversion, Disc, File, Metadata, Replaygain},
 	result::Result,
 };
 
@@ -21,6 +21,8 @@ pub fn incremental_build(
 	metadata: &Metadata,
 	tracklist: &[Disc],
 	files: &[File],
+	conversion: Option<&Conversion>,
+	replaygain: Option<&Replaygain>,
 	previous_index: &BuildIndex,
 	current_index: &mut BuildIndex,
 	index_file: &Path,
@@ -64,12 +66,23 @@ pub fn incremental_build(
 				})?,
 		);
 	}
+	hasher.update(
+		&to_stdvec(&conversion)
+			.change_context_lazy(error)
+			.attach_with(|| "while serializing conversion configuration to binary")?,
+	);
+	hasher.update(
+		&to_stdvec(&replaygain)
+			.change_context_lazy(error)
+			.attach_with(|| "while serializing replaygain configuration to binary")?,
+	);
 	let hash = hasher.finalize();
 
 	let mut invalidated_build = || -> Result<(), IncrementalBuildError> {
-		let unit_output_files =
-			build_unit(&hash, module_dir, metadata, tracklist, files, output_dir)
-				.change_context_lazy(error)?;
+		let unit_output_files = build_unit(
+			&hash, module_dir, metadata, tracklist, files, conversion, replaygain, output_dir,
+		)
+		.change_context_lazy(error)?;
 		current_index.insert(hash.to_string(), unit_output_files);
 		save_manifest(index_file, current_index).change_context_lazy(error)?;
 		*built_units += 1;
