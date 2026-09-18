@@ -1,6 +1,7 @@
 *
 
 !/.gitignore
+!/CONTEXT.md
 !/LICENSE
 !/README.md
 
@@ -11,20 +12,14 @@
 !/src/
 !/src/main.rs
 !/src/cli.rs
-!/src/command.rs
-!/src/dir.rs
 !/src/filesystem.rs
 !/src/manifest.rs
-!/src/model.rs
-!/src/print.rs
+!/src/module.rs
 !/src/result.rs
 !/src/run.rs
-!/src/source.rs
 
 !/src/build.rs
 !/src/build/
-!/src/build/finalize.rs
-!/src/build/normalize.rs
+!/src/build/incremental.rs
 !/src/build/prepare.rs
-!/src/build/process.rs
-!/src/build/raw.rs
+!/src/build/unit.rs

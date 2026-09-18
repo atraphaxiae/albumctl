@@ -24,7 +24,7 @@ pub fn load_manifest<T: DeserializeOwned>(file: &Path) -> Result<T, ManifestErro
 
 	let manifest = from_str(&data)
 		.change_context_lazy(error)
-		.attach_with(|| "while parsing TOML data")?;
+		.attach_with(|| format!("while parsing the contents of {file:?} as TOML"))?;
 
 	Ok(manifest)
 }
@@ -36,7 +36,7 @@ pub fn save_manifest<T: Serialize>(file: &Path, manifest: &T) -> Result<(), Mani
 
 	let data = to_string_pretty(manifest)
 		.change_context_lazy(error)
-		.attach_with(|| "while serializing to TOML")?;
+		.attach_with(|| "while serializing manifest to TOML")?;
 
 	write(file, data)
 		.change_context_lazy(error)
@@ -47,7 +47,7 @@ pub fn save_manifest<T: Serialize>(file: &Path, manifest: &T) -> Result<(), Mani
 
 #[derive(Debug, Error)]
 pub enum ManifestError {
-	#[error("Could not load manifest from {file:?}")]
+	#[error("Could not load manifest file {file:?}")]
 	LoadManifest { file: PathBuf },
 
 	#[error("Could not save manifest to {file:?}")]

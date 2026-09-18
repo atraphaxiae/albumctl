@@ -6,15 +6,17 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::{
+	build::prepare::build,
 	cli::{Cli, Command},
-	command::{build, check},
 	result::Result,
 };
 
 pub fn run() -> Result<(), RunError> {
+	println!();
+
 	let args = Cli::parse();
+
 	match args.command {
-		Command::Check { dir } => check(&dir).change_context(RunError)?,
 		Command::Build { dir } => build(&dir).change_context(RunError)?,
 	}
 
