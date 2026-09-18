@@ -13,41 +13,41 @@ use thiserror::Error;
 
 use crate::result::Result;
 
-pub fn get_file_type(path: &Path) -> Result<FileType, FilesystemError> {
-	let error = || FilesystemError::GetFileType {
-		path: path.to_path_buf(),
+pub fn get_item_type(item: &Path) -> Result<FileType, FilesystemError> {
+	let error = || FilesystemError::GetItemType {
+		item: item.to_path_buf(),
 	};
 
-	match path.metadata() {
+	match item.metadata() {
 		Ok(metadata) => Ok(metadata.file_type()),
 		Err(e) if e.kind() == ErrorKind::NotFound => {
-			Err(error()).attach(format!("{path:?} does not exist"))
+			Err(error()).attach(format!("{item:?} does not exist"))
 		}
 		Err(e) => Err(e)
 			.change_context(error())
-			.attach(format!("while reading metadata of {path:?}")),
+			.attach(format!("while reading metadata of {item:?}")),
 	}
 }
 
-pub fn get_mtime_size(path: &Path) -> Result<(SystemTime, u64), FilesystemError> {
+pub fn get_mtime_size(item: &Path) -> Result<(SystemTime, u64), FilesystemError> {
 	let error = || FilesystemError::GetMtimeSize {
-		path: path.to_path_buf(),
+		item: item.to_path_buf(),
 	};
 
-	match path.metadata() {
+	match item.metadata() {
 		Ok(metadata) => Ok((
 			metadata
 				.modified()
 				.change_context_lazy(error)
-				.attach_with(|| format!("while getting mtime of {path:?}"))?,
+				.attach_with(|| format!("while getting mtime of {item:?}"))?,
 			metadata.len(),
 		)),
 		Err(e) if e.kind() == ErrorKind::NotFound => {
-			Err(error()).attach(format!("{path:?} does not exist"))
+			Err(error()).attach(format!("{item:?} does not exist"))
 		}
 		Err(e) => Err(e)
 			.change_context(error())
-			.attach(format!("while reading metadata of {path:?}")),
+			.attach(format!("while reading metadata of {item:?}")),
 	}
 }
 
@@ -100,12 +100,12 @@ pub fn ensure_dir(dir: &Path) -> Result<(), FilesystemError> {
 	Ok(())
 }
 
-pub fn delete(path: &Path) -> Result<(), FilesystemError> {
+pub fn delete_item(item: &Path) -> Result<(), FilesystemError> {
 	let error = || FilesystemError::Delete {
-		path: path.to_path_buf(),
+		item: item.to_path_buf(),
 	};
 
-	let metadata = match path.metadata() {
+	let metadata = match item.metadata() {
 		Ok(metadata) => metadata,
 		Err(e) if e.kind() == ErrorKind::NotFound => return Ok(()),
 		Err(e) => {
@@ -116,13 +116,13 @@ pub fn delete(path: &Path) -> Result<(), FilesystemError> {
 	};
 
 	if metadata.is_file() {
-		remove_file(path)
+		remove_file(item)
 			.change_context_lazy(error)
-			.attach_with(|| format!("while deleting {path:?}"))?;
+			.attach_with(|| format!("while deleting {item:?}"))?;
 	} else if metadata.is_dir() {
-		remove_dir_all(path)
+		remove_dir_all(item)
 			.change_context_lazy(error)
-			.attach_with(|| format!("while deleting {path:?}"))?;
+			.attach_with(|| format!("while deleting {item:?}"))?;
 	}
 
 	Ok(())
@@ -160,11 +160,11 @@ pub fn move_file(from: &Path, to: &Path) -> Result<(), FilesystemError> {
 
 #[derive(Debug, Error)]
 pub enum FilesystemError {
-	#[error("Could not get file type of {path:?}")]
-	GetFileType { path: PathBuf },
+	#[error("Could not get item type of {item:?}")]
+	GetItemType { item: PathBuf },
 
-	#[error("Could not get mtime and size of {path:?}")]
-	GetMtimeSize { path: PathBuf },
+	#[error("Could not get mtime and size of {item:?}")]
+	GetMtimeSize { item: PathBuf },
 
 	#[error("Expected a file at {file:?}")]
 	RequireFile { file: PathBuf },
@@ -175,8 +175,8 @@ pub enum FilesystemError {
 	#[error("Could not ensure directory exists at {dir:?}")]
 	EnsureDir { dir: PathBuf },
 
-	#[error("Could not delete {path:?}")]
-	Delete { path: PathBuf },
+	#[error("Could not delete {item:?}")]
+	Delete { item: PathBuf },
 
 	#[error("Could not copy file from {from:?} to {to:?}")]
 	CopyFile { from: PathBuf, to: PathBuf },
