@@ -148,11 +148,11 @@ file = "03 - Pursuance.flac"
 ```
 
 There are no restrictions on the module hierarchy. You can make a module hierarchy as complex as you
-want. This example only shows a `Root -> Release` hierarchy, but you can also conceivably have:
+want. This example only shows a `Source -> Release` hierarchy, but you can also conceivably have:
 
-- `Root -> Album -> Release`
-- `Root -> Artist -> Year -> Album -> Release Year -> Release`
-- `Root -> Genre -> Release`
+- `Source -> Album -> Release`
+- `Source -> Artist -> Year -> Album -> Release Year -> Release`
+- `Source -> Genre -> Release`
 
 Or whatever module hierarchy you want.
 
