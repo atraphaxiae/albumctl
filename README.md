@@ -3,14 +3,14 @@ A declarative builder for your music library.
 
 > [!WARNING]
 > Due to how this `albumctl` works, there is a risk of data loss. Do not use this program unless you
-> are understand and accept this risk.
+> understand and accept this risk.
 
 `albumctl` builds your music library from a source directory of modules containing metadata and
 source music files. Unlike other music library managers, `albumctl` does not edit or discover
 metadata from outside sources. All metadata are user-provided via the modules.
 
 Modules may either contain other child modules or source music files. Child modules inherit the
-metadata of their parents, while the source music files are processed according to the metadata of
+metadata of their ancestors, while the source music files are processed according to the metadata of
 their containing module. An example of a source directory is:
 
 ```
@@ -43,7 +43,7 @@ cargo install albumctl
 
 Or build the latest development version from source:
 
-```
+```sh
 git clone https://github.com/atraphaxiae/albumctl.git
 cd albumctl
 cargo install --path .
@@ -52,5 +52,127 @@ cargo install --path .
 Ensure that Cargo's binary directory is in your `PATH` environment variable so that you can call
 `albumctl` directly.
 
+## Basic Usage
+Create the directory where you want to store your source files, then create `albumctl.toml` there.
+Say I want to have the album 'A Love Supreme' in my music library:
+
+```toml
+# albumctl.toml
+
+output_directory = "/home/atraphaxiae/Music" # This must be a full path
+
+[metadata]
+# Add global metadata here
+
+[children]
+modules = [
+	# This is a path to a folder containing a module.toml
+	"John Coltrane - (1965) A Love Supreme"
+]
+```
+
+Then, create the module for the album. In my case, I create the directory
+`John Coltrane - (1965) A Love Supreme` and put a `module.toml` inside, with more metadata:
+
+```toml
+# John Coltrane - (1965) A Love Supreme/module.toml
+
+[metadata]
+artist = "John Coltrane"
+album = "A Love Supreme"
+year = "1965"
+
+catalog_number = "A-77"
+release_year = "1965"
+media_type = "33 RPM"
+audio_channels = "Stereo"
+provenance = "PBTHAL"
+```
+
+Note that the metadata fields shown above are required for now; the leaf module (which defines the
+file mapping) must have those fields, either inherited from its ancestors or defined in its own
+metadata table.
+
+I also want to define a tracklist here:
+
+```toml
+# John Coltrane - (1965) A Love Supreme/module.toml
+
+# ...
+
+# This puts us in Disc 1
+[[discs]]
+[discs.metadata]
+# You can add per-disc metadata here
+
+# This puts us in Track 1.01
+[[discs.tracks]]
+[discs.tracks.metadata]
+# You can add per-track metadata here
+title = "Part I - Acknowledgement"
+
+# This puts us in Track 1.02
+[[discs.tracks]]
+[discs.tracks.metadata]
+title = "Part II - Resolution"
+
+# This puts us in Disc 2
+[[discs]]
+[discs.metadata]
+
+# This puts us in Track 2.01
+[[discs.tracks]]
+[discs.tracks.metadata]
+title = "Part III - Pursuance - IV - Psalm"
+```
+
+A leaf module must also have a tracklist, again either inherited from its ancestors or defined in
+itself. For now, each track must have a `title` field in its metadata table.
+
+Then, I can define the file mapping here too:
+
+```toml
+# John Coltrane - (1965) A Love Supreme/module.toml
+
+# ...
+
+[children]
+[[children.files]]
+file = "01 - Acknowledgement.flac" # This is a path relative to this module
+
+[[children.files]]
+file = "02 - Resolution.flac"
+
+[[children.files]]
+file = "03 - Pursuance.flac"
+```
+
+There are no restrictions on the module hierarchy. You can make a module hierarchy as complex as you
+want. This example only shows a `Root -> Release` hierarchy, but you can also conceivably have:
+
+- `Root -> Album -> Release`
+- `Root -> Artist -> Year -> Album -> Release Year -> Release`
+- `Root -> Genre -> Release`
+
+Or whatever module hierarchy you want.
+
+Then, running `albumctl build <DIR>`, where `DIR` is your source directory, `albumctl` will build
+and output your music library in `output_directory`. In my case, I'll get the following output
+directory tree:
+
+```
+/home/atraphaxiae/Music
+└── John Coltrane - (1965) A Love Supreme
+    └── (1965) A-77 [33 RPM, Stereo, PBTHAL]
+        ├── 1.01 Part I - Acknowledgement.flac
+        ├── 1.02 Part II - Resolution.flac
+        └── 2.01 Part III - Pursuance - IV - Psalm.flac
+```
+
+Right now, `albumctl` outputs your music directory using an `Output -> Album -> Release` hierarchy.
+In the future this will be customizable, along with which metadata to use for generating file and
+folder names.
+
 ## Documentation
-The comprehensive documentation of `albumctl` is found at [`https://atraphaxiae.github.io/albumctl/`](https://atraphaxiae.github.io/albumctl/).
+The comprehensive documentation of `albumctl` is found at
+[`https://atraphaxiae.github.io/albumctl/`](https://atraphaxiae.github.io/albumctl/).
