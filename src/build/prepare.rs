@@ -41,6 +41,14 @@ pub fn build(dir: &Path) -> Result<(), PrepareBuildError> {
 	let previous_index = load_manifest::<BuildIndex>(&index_file).change_context_lazy(error)?;
 	let mut current_index = BuildIndex::new();
 
+	// Delete all unit build dirs
+	for item in read_dir(&build_dir).change_context_lazy(error)? {
+		let item = item.change_context_lazy(error)?.path();
+		if item != index_file {
+			delete(&item).change_context_lazy(error)?;
+		}
+	}
+
 	let mut total_modules = 0_usize;
 	let mut successful_modules = 0_usize;
 

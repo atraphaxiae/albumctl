@@ -43,7 +43,6 @@ pub fn build_unit(
 	let provenance = get_unit_field(metadata, unit_dir, "provenance").change_context_lazy(error)?;
 
 	let unit_build_dir = output_dir.join(format!(".albumctl/{hash}"));
-	delete(&unit_build_dir).change_context_lazy(error)?;
 	ensure_dir(&unit_build_dir).change_context_lazy(error)?;
 
 	let unit_output_dir = output_dir.join(format!(
@@ -176,7 +175,6 @@ pub fn build_unit(
 		unit_output_files.push(output_file_full);
 	}
 
-	delete(&unit_build_dir).change_context_lazy(error)?;
 	Ok(unit_output_files)
 }
 
