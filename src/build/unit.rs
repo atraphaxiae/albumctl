@@ -37,55 +37,41 @@ pub fn build_unit(
 		get_unit_field(metadata, unit_dir, "audio_channels").change_context_lazy(error)?;
 	let provenance = get_unit_field(metadata, unit_dir, "provenance").change_context_lazy(error)?;
 
-	let new_files = files
-		.iter()
-		.map(|file| {
-			let title = get_track_field(tracklist, file.disc_number, file.track_number, "title")?;
-
-			Ok(File {
-				file: PathBuf::from(format!(
-					"{}.{:02} {}",
-					file.disc_number, file.track_number, title
-				))
-				.with_added_extension(file.file.extension().unwrap_or_default()),
-				disc_number: file.disc_number,
-				track_number: file.track_number,
-			})
-		})
-		.collect::<Result<Vec<_>, MetadataError>>()
-		.change_context_lazy(error)?;
-
-	let unit_build_dir = output_dir.join(format!(".albumctl/{}", hash));
+	let unit_build_dir = output_dir.join(format!(".albumctl/{hash}"));
 	delete(&unit_build_dir).change_context_lazy(error)?;
 	ensure_dir(&unit_build_dir).change_context_lazy(error)?;
-
-	for file in files {
-		let from = unit_dir.join(&file.file);
-		let to = unit_build_dir.join(&file.file);
-		copy_file(&from, &to).change_context_lazy(error)?;
-	}
-
-	for (old_file, new_file) in files.iter().zip(new_files.iter()) {
-		let from = unit_build_dir.join(&old_file.file);
-		let to = unit_build_dir.join(&new_file.file);
-		move_file(&from, &to).change_context_lazy(error)?;
-	}
 
 	let unit_output_dir = output_dir.join(format!(
 		"{artist} - ({year}) {album}/({release_year}) {catalog_number} [{media_type}, {audio_channels}, {provenance}]"
 	));
 	ensure_dir(&unit_output_dir).change_context_lazy(error)?;
 
-	for file in &new_files {
-		let from = unit_build_dir.join(&file.file);
-		let to = unit_output_dir.join(&file.file);
-		move_file(&from, &to).change_context_lazy(error)?;
-	}
+	let mut unit_output_files = Vec::new();
+	for File {
+		file: original_file,
+		disc_number,
+		track_number,
+	} in files
+	{
+		let title = get_track_field(tracklist, *disc_number, *track_number, "title")
+			.change_context_lazy(error)?;
+		let consistent_filename = format!("{disc_number}.{track_number:02} {title}");
 
-	let unit_output_files = new_files
-		.into_iter()
-		.map(|file| unit_output_dir.join(&file.file))
-		.collect::<Vec<_>>();
+		let original_file_full = unit_dir.join(&original_file);
+		let copied_file_full = unit_build_dir.join(&original_file);
+		let build_file_full = unit_build_dir
+			.join(&consistent_filename)
+			.with_added_extension(copied_file_full.extension().unwrap_or_default());
+		let output_file_full = unit_output_dir
+			.join(&consistent_filename)
+			.with_added_extension(copied_file_full.extension().unwrap_or_default());
+
+		copy_file(&original_file_full, &copied_file_full).change_context_lazy(error)?;
+		move_file(&copied_file_full, &build_file_full).change_context_lazy(error)?;
+		move_file(&build_file_full, &output_file_full).change_context_lazy(error)?;
+
+		unit_output_files.push(output_file_full);
+	}
 
 	delete(&unit_build_dir).change_context_lazy(error)?;
 	Ok(unit_output_files)

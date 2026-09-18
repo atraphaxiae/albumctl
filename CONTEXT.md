@@ -49,7 +49,8 @@ Time to get to the annoying bits, because this part uses a lot of filesystem ops
 
 1. Get the metadata that we need. We need artist, year, album, release year, catalog number, media
 	type, audio channels, and provenance.
-2. Delete and regenerate the unit build dir `.albumctl/{hash}`.
+2. Delete and regenerate the unit build dir `.albumctl/{hash}`. This is to remove the dir from a
+	failed build.
 3. Create the unit output dir
 	`{artist} - ({year}) {album}/({release_year}) {catalog_number} [{media_type}, {audio_channels}, {provenance}]`.
 	Then the following steps are to be done for each file:
@@ -65,4 +66,5 @@ Time to get to the annoying bits, because this part uses a lot of filesystem ops
 	needed.
 9. Move the file to the unit output dir
 10. Go back to (4) for the next file
-11. Done!
+11. Delete the unit build dir.
+12. Done!
