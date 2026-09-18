@@ -129,18 +129,22 @@ pub fn build_unit(
 			clip_mode,
 		}) = replaygain
 		{
-			// rsgain custom -l <LUFS> [--album] -c <CLIPMODE>
+			// rsgain custom -s i [--album] -l <LUFS> -c <CLIPMODE>
 			let mut command = Command::new(rsgain_command);
 
 			command.arg("custom");
 
-			command.arg("-l");
-			command.arg(target_lufs.to_string());
+			command.arg("-s");
+			command.arg("i");
 
 			if *album_gain {
 				command.arg("-a");
 
 			}
+
+			command.arg("-l");
+			command.arg(target_lufs.to_string());
+
 			command.arg("-c");
 			match clip_mode {
 				ClipMode::Disabled => command.arg("n"),
