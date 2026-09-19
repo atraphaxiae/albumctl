@@ -62,7 +62,7 @@ fn recurse_modules<'a>(
 	module_dir: &Path,
 	parent_metadata: &Metadata,
 	parent_tracklist: Option<&[Disc]>,
-	conversion: Option<&'a Convert>,
+	convert: Option<&'a Convert>,
 	replaygain: Option<&'a Replaygain>,
 	total_modules: &mut usize,
 	loaded_modules: &mut usize,
@@ -101,7 +101,7 @@ fn recurse_modules<'a>(
 					&child_dir,
 					&metadata,
 					tracklist,
-					conversion,
+					convert,
 					replaygain,
 					total_modules,
 					loaded_modules,
@@ -154,7 +154,7 @@ fn recurse_modules<'a>(
 
 			loaded_units.push(
 				Unit::new(
-					module_dir, &metadata, tracklist, &files, conversion, replaygain,
+					module_dir, &metadata, tracklist, &files, convert, replaygain,
 				)
 				.change_context_lazy(error)?,
 			);

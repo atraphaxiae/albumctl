@@ -51,7 +51,7 @@ impl<'a> Unit<'a> {
 		metadata: &Metadata,
 		tracklist: &[Disc],
 		files: &[File],
-		conversion: Option<&'a Convert>,
+		convert: Option<&'a Convert>,
 		replaygain: Option<&'a Replaygain>,
 	) -> Result<Self, UnitError> {
 		let error = || UnitError::New {
@@ -91,9 +91,9 @@ impl<'a> Unit<'a> {
 		}
 
 		hasher.update(
-			&to_stdvec(&conversion)
+			&to_stdvec(&convert)
 				.change_context_lazy(error)
-				.attach_with(|| "while serializing conversion configuration to binary")?,
+				.attach_with(|| "while serializing convert configuration to binary")?,
 		);
 		hasher.update(
 			&to_stdvec(&replaygain)
@@ -108,7 +108,7 @@ impl<'a> Unit<'a> {
 			metadata: metadata.clone(),
 			tracklist: tracklist.to_vec(),
 			files: files.to_vec(),
-			convert: conversion,
+			convert,
 			replaygain,
 			hash,
 		})

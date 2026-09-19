@@ -58,7 +58,7 @@ Time to get to the annoying bits, because this part uses a lot of filesystem ops
 	`{disc_number}.{track_number:02} {title}`
 5. Copy the source audio file to the unit build dir.
 4. Rename the copied file using the consistent filename, retaining its original extension.
-6. If conversion is specified, use ffmpeg. The output filename should be the renamed filename plus
+6. If convert is specified, use ffmpeg. The output filename should be the renamed filename plus
 	the target extension.
 7. Delete the copied file, then rename the output file using the consistent filename plus the target
 	extension.

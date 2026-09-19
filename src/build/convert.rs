@@ -50,9 +50,9 @@ impl Convert {
 
 #[derive(Debug, Error)]
 pub enum ConvertError {
-	#[error("Could not execute conversion for file {file:?}")]
+	#[error("Could not execute convert for file {file:?}")]
 	Execute { file: PathBuf },
 
-	#[error("ffmpeg conversion failed for file {file:?}:\n{stderr}")]
+	#[error("ffmpeg convert failed for file {file:?}:\n{stderr}")]
 	Ffmpeg { file: PathBuf, stderr: String },
 }
