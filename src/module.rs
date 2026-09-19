@@ -4,37 +4,15 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, path::PathBuf};
 
+use crate::build::{convert::Convert, replaygain::Replaygain};
+
 #[derive(Debug, Deserialize)]
 pub struct RootModule {
 	pub output_directory: PathBuf,
-	pub conversion: Option<Conversion>,
+	pub convert: Option<Convert>,
 	pub replaygain: Option<Replaygain>,
 	pub metadata: Metadata,
 	pub children: RootChildren,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Conversion {
-	pub ffmpeg_command: String,
-	pub target_format: String,
-	pub sample_rate: u32,
-	pub sample_format: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Replaygain {
-	pub rsgain_command: String,
-	pub album_gain: bool,
-	pub target_lufs: f32,
-	pub clip_mode: ClipMode,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ClipMode {
-	Disabled,
-	PositiveGain,
-	AlwaysEnabled,
 }
 
 #[derive(Debug, Deserialize)]
@@ -51,13 +29,13 @@ pub struct Module {
 
 pub type Metadata = BTreeMap<String, String>;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Disc {
 	pub metadata: Metadata,
 	pub tracks: Vec<Track>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Track {
 	pub metadata: Metadata,
 }
@@ -69,7 +47,7 @@ pub enum Children {
 	Files { files: Vec<File> },
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct File {
 	pub file: PathBuf,
 	pub disc_number: usize,

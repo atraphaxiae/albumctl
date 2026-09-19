@@ -6,7 +6,7 @@ use error_stack::ResultExt;
 use thiserror::Error;
 
 use crate::{
-	build::prepare::build,
+	build::build,
 	cli::{Cli, Command},
 	result::Result,
 };
