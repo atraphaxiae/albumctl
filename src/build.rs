@@ -33,7 +33,7 @@ pub type BuildIndex = HashMap<String, Vec<PathBuf>>;
 
 pub fn build(source_dir: &Path) -> Result<(), BuildError> {
 	let error = || BuildError {
-		source_dir: source_dir.to_path_buf(),
+		dir: source_dir.to_path_buf(),
 	};
 
 	let root_module = source_dir.join("albumctl.toml");
@@ -98,7 +98,7 @@ pub fn check() {
 }
 
 #[derive(Debug, Error)]
-#[error("Failed to build source directory {source_dir:?}")]
+#[error("Failed to build source directory {dir:?}")]
 pub struct BuildError {
-	source_dir: PathBuf,
+	dir: PathBuf,
 }
