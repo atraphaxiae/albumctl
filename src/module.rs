@@ -39,7 +39,6 @@ pub struct Disc {
 	pub tracks: Vec<Track>,
 }
 
-
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Track {
