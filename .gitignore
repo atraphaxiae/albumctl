@@ -20,6 +20,10 @@
 
 !/src/build.rs
 !/src/build/
-!/src/build/incremental.rs
-!/src/build/prepare.rs
+!/src/build/clean.rs
+!/src/build/convert.rs
+!/src/build/load.rs
+!/src/build/replaygain.rs
+!/src/build/skip.rs
+!/src/build/summary.rs
 !/src/build/unit.rs
