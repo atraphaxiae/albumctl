@@ -16,17 +16,19 @@ their containing module. An example of a source directory is:
 ```
 music_library
 ├── albumctl.toml
-└── John Coltrane - (1965) A Love Supreme
+└── Wayne Shorter - (1966) Speak No Evil
     ├── module.toml
-    └── (2010) AIPJ 77
+    └── (2015) MMBST-84194
         ├── module.toml
         ├── Track 1.flac
         ├── Track 2.flac
         ├── Track 3.flac
-        └── Track 4.flac
+        ├── Track 4.flac
+        ├── Track 5.flac
+        └── Track 6.flac
 ```
 
-`music_library` is the root module, while `John Coltrane - (1965) A Love Supreme` is its child
+`music_library` is the root module, while `Wayne Shorter - (1966) Speak No Evil` is its child
 module, and so on. `albumctl.toml` contains the configuration of the music library, while
 `module.toml` files contain metadata.
 
@@ -140,11 +142,19 @@ Then, I can define the file mapping here too:
 [[children.files]]
 file = "01 - Acknowledgement.flac" # This is a path relative to this module
 
-[[children.files]]
-file = "02 - Resolution.flac"
+# This maps the file to Track 1.01 in the tracklist
+disc_number = 1
+track_number = 1
 
 [[children.files]]
-file = "03 - Pursuance.flac"
+file = "02 - Resolution.flac"
+disc_number = 1
+track_number = 2
+
+[[children.files]]
+file = "03 - Pursuance - Psalm.flac"
+disc_number = 2
+track_number = 1
 ```
 
 There are no restrictions on the module hierarchy. You can make a module hierarchy as complex as you
@@ -155,6 +165,18 @@ want. This example only shows a `Source -> Release` hierarchy, but you can also 
 - `Source -> Genre -> Release`
 
 Or whatever module hierarchy you want.
+
+Now the file tree of the source directory looks like:
+
+```
+music-library-source
+├── albumctl.toml
+└── John Coltrane - (1965) A Love Supreme
+    ├── module.toml
+    ├── 01 - Acknowledgement.flac
+    ├── 02 - Resolution.flac
+    └── 03 - Pursuance - Psalm.flac
+```
 
 Then, running `albumctl build <DIR>`, where `DIR` is your source directory, `albumctl` will build
 and output your music library in `output_directory`. In my case, I'll get the following output
@@ -174,8 +196,8 @@ In the future this will be customizable, along with which metadata to use for ge
 folder names.
 
 A more comprehensive example of how to use `albumctl` can be found in
-my [`music-library`](https://github.com/atraphaxiae/music-library) repository, which I use to
-generate my own music library.
+my [`music-library`](https://github.com/atraphaxiae/music-library) repository, which is what I use
+to generate my own music library.
 
 ## Documentation
 The comprehensive documentation of `albumctl` is found at
