@@ -16,17 +16,19 @@ their containing module. An example of a source directory is:
 ```
 music_library
 ├── albumctl.toml
-└── John Coltrane - (1965) A Love Supreme
+└── Wayne Shorter - (1966) Speak No Evil
     ├── module.toml
-    └── (2010) AIPJ 77
+    └── (2015) MMBST-84194
         ├── module.toml
         ├── Track 1.flac
         ├── Track 2.flac
         ├── Track 3.flac
-        └── Track 4.flac
+        ├── Track 4.flac
+        ├── Track 5.flac
+        └── Track 6.flac
 ```
 
-`music_library` is the root module, while `John Coltrane - (1965) A Love Supreme` is its child
+`music_library` is the root module, while `Wayne Shorter - (1966) Speak No Evil` is its child
 module, and so on. `albumctl.toml` contains the configuration of the music library, while
 `module.toml` files contain metadata.
 
@@ -150,7 +152,7 @@ disc_number = 1
 track_number = 2
 
 [[children.files]]
-file = "03 - Pursuance.flac"
+file = "03 - Pursuance - Psalm.flac"
 disc_number = 2
 track_number = 1
 ```
@@ -163,6 +165,18 @@ want. This example only shows a `Source -> Release` hierarchy, but you can also 
 - `Source -> Genre -> Release`
 
 Or whatever module hierarchy you want.
+
+Now the file tree of the source directory looks like:
+
+```
+music-library-source
+├── albumctl.toml
+└── John Coltrane - (1965) A Love Supreme
+    ├── module.toml
+    ├── 01 - Acknowledgement.flac
+    ├── 02 - Resolution.flac
+    └── 03 - Pursuance - Psalm.flac
+```
 
 Then, running `albumctl build <DIR>`, where `DIR` is your source directory, `albumctl` will build
 and output your music library in `output_directory`. In my case, I'll get the following output
