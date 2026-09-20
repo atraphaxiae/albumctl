@@ -2,7 +2,7 @@
 A declarative builder for your music library.
 
 > [!WARNING]
-> Due to how this `albumctl` works, there is a risk of data loss. Do not use this program unless you
+> Due to how `albumctl` works, there is a risk of data loss. Do not use this program unless you
 > understand and accept this risk.
 
 `albumctl` builds your music library from a source directory of modules containing metadata and
