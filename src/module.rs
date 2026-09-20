@@ -7,6 +7,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 use crate::build::{convert::Convert, replaygain::Replaygain};
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RootModule {
 	pub output_directory: PathBuf,
 	pub convert: Option<Convert>,
@@ -16,11 +17,13 @@ pub struct RootModule {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RootChildren {
 	pub modules: Vec<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Module {
 	pub metadata: Metadata,
 	pub discs: Option<Vec<Disc>>,
@@ -30,12 +33,15 @@ pub struct Module {
 pub type Metadata = BTreeMap<String, String>;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Disc {
 	pub metadata: Metadata,
 	pub tracks: Vec<Track>,
 }
 
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Track {
 	pub metadata: Metadata,
 }
@@ -48,6 +54,7 @@ pub enum Children {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct File {
 	pub file: PathBuf,
 	pub disc_number: usize,

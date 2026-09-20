@@ -10,6 +10,7 @@ use thiserror::Error;
 use crate::result::Result;
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Replaygain {
 	pub rsgain_command: String,
 	pub album_gain: bool,
