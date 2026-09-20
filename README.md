@@ -140,11 +140,19 @@ Then, I can define the file mapping here too:
 [[children.files]]
 file = "01 - Acknowledgement.flac" # This is a path relative to this module
 
+# This maps the file to Track 1.01 in the tracklist
+disc_number = 1
+track_number = 1
+
 [[children.files]]
 file = "02 - Resolution.flac"
+disc_number = 1
+track_number = 2
 
 [[children.files]]
 file = "03 - Pursuance.flac"
+disc_number = 2
+track_number = 1
 ```
 
 There are no restrictions on the module hierarchy. You can make a module hierarchy as complex as you
